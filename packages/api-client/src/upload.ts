@@ -1,4 +1,4 @@
-import type { MediaSignInput } from '@vogn/validation';
+import { MEDIA_LIMITS, type MediaSignInput } from '@vogn/validation';
 import type { ApiClient } from './client';
 import type { UploadedMedia } from './dto';
 import { ApiError } from './http';
@@ -38,7 +38,7 @@ export async function uploadMedia(
     appendFile(testForm);
     const file = testForm.get('file');
     if (!(file instanceof Blob)) throw error;
-    if (file.size > 2 * 1024 * 1024) throw new ApiError('PAYLOAD_TOO_LARGE', 'Private test images must be smaller than 2 MB.', 413);
+    if (file.size > MEDIA_LIMITS.testImageBytes) throw new ApiError('PAYLOAD_TOO_LARGE', 'Private test images must be smaller than 2 MB.', 413);
     const bytes = new Uint8Array(await file.arrayBuffer());
     let binary = '';
     for (const byte of bytes) binary += String.fromCharCode(byte);

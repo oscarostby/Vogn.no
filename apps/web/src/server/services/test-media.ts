@@ -3,7 +3,7 @@ import type { MediaAssetDoc } from '@vogn/database';
 import { Binary, ObjectId } from 'mongodb';
 import sharp from 'sharp';
 import type { z } from 'zod';
-import { IMAGE_MIME_TYPES, mediaSignSchema } from '@vogn/validation';
+import { IMAGE_MIME_TYPES, MEDIA_LIMITS, mediaSignSchema } from '@vogn/validation';
 import { z as schema } from 'zod';
 import type { AuthedContext } from '../context';
 import { requireActive } from '../context';
@@ -17,7 +17,7 @@ import { getPublicProfile } from './users';
 import { canViewVehicle } from './vehicles';
 
 // Small sanitized images only: comfortably below Vercel's request/response body limits.
-export const TEST_IMAGE_BYTES = 2 * 1024 * 1024;
+export const TEST_IMAGE_BYTES = MEDIA_LIMITS.testImageBytes;
 export const testImageSchema = mediaSignSchema.extend({ base64: schema.string().max(Math.ceil(TEST_IMAGE_BYTES / 3) * 4) });
 
 function requireTestStorage() {

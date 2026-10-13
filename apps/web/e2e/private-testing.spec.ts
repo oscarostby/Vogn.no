@@ -94,6 +94,13 @@ test('private login, Mongo persistence, image privacy, two-user chat, Studio and
   ]);
   expect(avatarDrop.status()).toBe(200);
   await expect(avatarArea.getByRole('button', { name: 'Change avatar' })).toBeVisible();
+  const bigPhoto = await sharp({ create: { width: 4000, height: 3000, channels: 3, background: '#000', noise: { type: 'gaussian', mean: 128, sigma: 20 } } }).jpeg({ quality: 92 }).toBuffer();
+  expect(bigPhoto.length).toBeGreaterThan(2 * 1024 * 1024);
+  const [bigAvatar] = await Promise.all([
+    a.page.waitForResponse((response) => response.url().endsWith('/api/v1/me') && response.request().method() === 'PATCH'),
+    a.page.locator('input[type="file"]').first().setInputFiles({ name: 'big-photo.jpg', mimeType: 'image/jpeg', buffer: bigPhoto }),
+  ]);
+  expect(bigAvatar.status()).toBe(200);
   await a.page.goto(`/c/browser-test-crew/studio`);
   await a.page.getByRole('combobox', { name: 'Preset', exact: true }).selectOption('tokyo-midnight');
   await a.page.getByRole('button', { name: 'Publish', exact: true }).click();

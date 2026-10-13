@@ -6,6 +6,7 @@ import type { MediaSignInput } from '@vogn/validation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { api, queryKeys } from './api';
+import { shrinkImage } from './shrink-image';
 
 export function isOnboarding(me: MeProfile | OnboardingState | undefined): me is OnboardingState {
   return Boolean(me && 'needsOnboarding' in me);
@@ -35,12 +36,13 @@ export interface UploadState {
   error: string | null;
 }
 
-/** Signed direct upload to the media CDN, verified and registered by the API. */
+/** Signed direct upload to the media CDN, verified and registered by the API. Oversized photos are shrunk first. */
 export function useMediaUpload() {
   const [state, setState] = useState<UploadState>({ uploading: false, progress: 0, error: null });
-  const upload = useCallback(async (file: File, purpose: MediaSignInput['purpose'], contextId?: string) => {
+  const upload = useCallback(async (original: File, purpose: MediaSignInput['purpose'], contextId?: string) => {
     setState({ uploading: true, progress: 0, error: null });
     try {
+      const file = await shrinkImage(original);
       const result = await uploadMedia(
         api,
         { purpose, mime: file.type as MediaSignInput['mime'], size: file.size, filename: file.name, contextId },

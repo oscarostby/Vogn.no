@@ -35,6 +35,8 @@ export const MEDIA_LIMITS = {
   videoBytes: 100 * 1024 * 1024,
   fileBytes: 25 * 1024 * 1024,
   evidenceBytes: 15 * 1024 * 1024,
+  /** Private test storage in MongoDB, used while Cloudinary is not configured. */
+  testImageBytes: 2 * 1024 * 1024,
 } as const;
 
 export const mediaSignSchema = z.object({
