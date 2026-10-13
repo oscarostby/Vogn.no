@@ -13,8 +13,8 @@ function Art({ kind, height, forceDark, priority }: { kind: keyof typeof ART; he
   const style = { height, width: 'auto' } as const;
   return (
     <>
-      <Image src={a.dark} alt="" width={width} height={height} priority={priority} style={style} className={cn('object-contain', !forceDark && 'logo-on-dark')} />
-      {!forceDark && <Image src={a.light} alt="" width={width} height={height} priority={priority} style={style} className="logo-on-light object-contain" />}
+      <Image src={a.dark} alt="" width={width} height={height} unoptimized priority={priority} style={style} className={cn('object-contain', !forceDark && 'logo-on-dark')} />
+      {!forceDark && <Image src={a.light} alt="" width={width} height={height} unoptimized priority={priority} style={style} className="logo-on-light object-contain" />}
     </>
   );
 }
