@@ -27,6 +27,7 @@ import type {
   NotificationType,
   OfficialVehicleData,
   PlatformRole,
+  PublicBadge,
   ReportReason,
   ReportStatus,
   ReportTargetType,
@@ -91,6 +92,8 @@ export interface UserDoc extends Timestamps {
   suspensionReason: string | null;
   /** Derived verification levels (source of truth: verificationResults). */
   verificationLevels: VerificationLevel[];
+  /** Badges the user chose to display (derived from levels + settings + staff role). */
+  publicBadges: PublicBadge[];
   emailVerified: boolean;
   phoneVerified: boolean;
   lastActiveAt: Date | null;

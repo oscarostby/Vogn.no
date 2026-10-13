@@ -38,6 +38,7 @@ export const RESERVED_HANDLES = new Set([
   'garage',
   'help',
   'home',
+  'id',
   'invite',
   'legal',
   'login',
