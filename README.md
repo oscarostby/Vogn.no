@@ -23,7 +23,9 @@ Before opening registration to real users, replace the committed test credential
 
 ## Vercel
 
-Follow [the deployment guide](docs/deployment.md). Set Root Directory to `apps/web` and deploy. No environment-variable import is needed for this private test build. Atlas must accept connections from the deployment.
+Follow [the deployment guide](docs/deployment.md). Set Root Directory to the repository root (`.`); the root `vercel.json` selects `apps/web` as the Next.js service. No environment-variable import is needed for this private test build. Atlas must accept connections from the deployment.
+
+The current code has one deployable service, `web`, serving pages and `/api/*`. The directories in `packages/` are shared libraries bundled into the app, not independently running Vite services. There are no internal HTTP service calls or bindings. The root config uses Vercel services mode so additional runnable apps can be added later. Run `vercel dev` from the repository root to test the service routing locally.
 
 ## Checks
 

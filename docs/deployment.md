@@ -9,13 +9,29 @@ Du trenger ingen miljøimport for denne private testversjonen. Miljøvariabler k
 ## Importer repoet i Vercel
 
 1. Push kodeendringene til GitHub og importer repoet i Vercel.
-2. Velg **Next.js**, **Root Directory: `apps/web`**. Tillat filer utenfor rotmappen (workspace-pakkene ligger i `packages/`). Bruk standard Next.js build/output og pnpm fra repoets `packageManager`.
+2. Sett **Root Directory til repo-roten (`.`)**, ikke `apps/web`. Fjern eventuelle prosjekt-overstyringer for build/output/install; `vercel.json` i repo-roten definerer `web` med rot `apps/web` og rammeverk `nextjs`. Bruk pnpm fra repoets `packageManager`.
 3. Ingen miljøvariabler må legges inn for hovedfunksjonene i testversjonen.
 4. Deploy eller redeploy. Vercel-adressen brukes automatisk hvis `NEXT_PUBLIC_APP_URL` ikke er satt. Sett den selv når du knytter til eget domene.
 5. Besøk `/sign-in`. Bruk testnavnet `oscar` og `TEST_AUTH_PASSWORD`. Dette testnavnet er klargjort med admin-tilgang. Fullfør onboarding. Åpne en separat nettleserprofil og logg inn med et annet navn for å teste en vanlig konto.
 6. `/api/v1/health` skal returnere `status: "ok"` og `database.ok: true`. Manglende valgfrie integrasjoner vises separat.
 
-Offisiell dokumentasjon: [Vercel monorepos](https://vercel.com/docs/monorepos), [miljøvariabler](https://vercel.com/docs/environment-variables).
+Offisiell dokumentasjon: [Vercel services](https://vercel.com/docs/services), [miljøvariabler](https://vercel.com/docs/environment-variables).
+
+## Tjenester, ruter og lokal testing
+
+Repoet har foreløpig én kjørbar tjeneste: `web`. Den inneholder både Next.js-sidene og API-rutene. Catch-all-regelen `/(.*)` sender alle offentlige forespørsler til `web` med opprinnelig sti, inkludert `/api/v1/*`, `/api/test-auth/session`, `/api/webhooks/*` og `/api/cron/maintenance`. API-klienten bruker samme origin og `/api/v1`; ingen nytt sti-prefiks er nødvendig. Autentisering og tilgangskontroll håndteres fortsatt av appen.
+
+Alle ni mappene under `packages/` er delte TypeScript-biblioteker som importeres direkte av appen. Vite brukes som testverktøy, ikke som en separat frontend/server. `packages/database` er MongoDB-klientkode; selve databasen kjører i Atlas. Disse pakkene skal derfor ikke stå i `services` og trenger ingen URL-bindinger.
+
+Kjør fra repo-roten etter `pnpm install --frozen-lockfile`:
+
+```sh
+vercel dev
+```
+
+Med en oppdatert Vercel CLI kan `vercel dev -L` brukes uten innlogging. Kontroller `/`, `/sign-in`, `/api/v1/health` og en autentisert API-forespørsel. Vercel-konfigurasjonen ligger bare i repo-roten; den daglige cron-jobben er flyttet dit og beholder sti og tidspunkt (`04:00 UTC`).
+
+Hvis en ny kjørbar backend legges til senere, definer den som en tjeneste og legg eventuelle bindinger på tjenesten som kaller den. Bindinger skal leses i funksjoner ved runtime, ikke ved build eller i middleware/proxy. La Vercel injisere URL-variabelen; ikke sett den manuelt. Bare tjenester som skal være offentlige får en top-level rewrite; mer spesifikke regler må stå før catch-all-regelen. Se [service bindings](https://vercel.com/docs/services/bindings) og [routing](https://vercel.com/docs/services/routing).
 
 ## MongoDB Atlas
 
