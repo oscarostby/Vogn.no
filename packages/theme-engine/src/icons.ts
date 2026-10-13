@@ -1,0 +1,61 @@
+/**
+ * Icon allowlist (Lucide icon names). Used for channel icons, navigation items, widgets and role badges.
+ * Renderers map these ids to components; unknown ids fall back to `hash`.
+ */
+export const THEME_ICONS = [
+  'hash',
+  'megaphone',
+  'image',
+  'messages-square',
+  'message-circle',
+  'car',
+  'car-front',
+  'wrench',
+  'calendar',
+  'calendar-days',
+  'mic',
+  'trophy',
+  'flag',
+  'map',
+  'map-pin',
+  'camera',
+  'gauge',
+  'zap',
+  'flame',
+  'star',
+  'shield',
+  'shield-check',
+  'crown',
+  'sparkles',
+  'mountain',
+  'compass',
+  'tent',
+  'users',
+  'book-open',
+  'link',
+  'heart',
+  'music',
+  'paintbrush',
+  'droplet',
+  'sun',
+  'moon',
+  'cog',
+  'fuel',
+  'key',
+  'route',
+  'timer',
+  'award',
+  'home',
+  'info',
+  'scroll-text',
+  'bar-chart-3',
+  'video',
+  'globe',
+  'store',
+  'gem',
+] as const;
+export type ThemeIcon = (typeof THEME_ICONS)[number];
+
+export function isThemeIcon(value: string): value is ThemeIcon {
+  return (THEME_ICONS as readonly string[]).includes(value);
+}

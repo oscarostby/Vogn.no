@@ -1,0 +1,26 @@
+{
+  "name": "@vogn/validation",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared Zod schemas",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "zod": "catalog:",
+    "@vogn/types": "workspace:*",
+    "@vogn/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "vite": "catalog:"
+  }
+}

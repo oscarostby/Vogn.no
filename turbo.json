@@ -1,0 +1,42 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "globalDependencies": ["tsconfig.base.json"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "NEXT_PUBLIC_*",
+        "CLERK_*",
+        "MONGODB_*",
+        "ABLY_*",
+        "CLOUDINARY_*",
+        "R2_*",
+        "VEGVESEN_*",
+        "LIVEKIT_*",
+        "UPSTASH_*",
+        "DATA_ENCRYPTION_KEY",
+        "CRON_SECRET",
+        "PLATFORM_ADMIN_*",
+        "FEATURE_*",
+        "SENTRY_*",
+        "EXPO_*"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": []
+    },
+    "typecheck": {
+      "dependsOn": []
+    },
+    "test": {
+      "dependsOn": [],
+      "outputs": ["coverage/**"]
+    }
+  }
+}

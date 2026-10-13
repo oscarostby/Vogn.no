@@ -1,0 +1,29 @@
+{
+  "name": "@vogn/database",
+  "version": "0.0.0",
+  "private": true,
+  "description": "MongoDB access layer (server-only)",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "mongodb": "catalog:",
+    "@vogn/types": "workspace:*",
+    "@vogn/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "vite": "catalog:",
+    "@types/node": "catalog:",
+    "mongodb-memory-server": "^11.3.0"
+  }
+}

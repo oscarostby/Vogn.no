@@ -1,0 +1,25 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+catalog:
+  react: 19.2.3
+  react-dom: 19.2.3
+  "@types/react": ~19.2.2
+  "@types/react-dom": ~19.2.2
+  "@types/node": ^24.19.2
+  typescript: ~6.0.3
+  zod: ^4.6.7
+  mongodb: ^7.7.0
+  vitest: ^5.0.4
+  vite: ^8.3.4
+  eslint: ^9.39.5
+  typescript-eslint: ^8.71.2
+  ably: ^2.29.0
+  date-fns: ^4.4.0
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - unrs-resolver
+  - "@tailwindcss/oxide"

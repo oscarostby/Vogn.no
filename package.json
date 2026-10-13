@@ -1,0 +1,35 @@
+{
+  "name": "vogn",
+  "private": true,
+  "description": "VOGN — Your crew. Your space. Global community platform for car enthusiasts.",
+  "packageManager": "pnpm@10.34.6",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=@vogn/web",
+    "dev:mobile": "pnpm --filter @vogn/mobile start",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "pnpm --filter @vogn/web test:e2e",
+    "check": "turbo run typecheck lint test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,css}\"",
+    "db:setup": "tsx --env-file-if-exists=apps/web/.env.local scripts/db-setup.ts",
+    "db:seed": "tsx --env-file-if-exists=apps/web/.env.local scripts/db-seed-fixtures.ts",
+    "db:check": "tsx --env-file-if-exists=apps/web/.env.local scripts/db-check.ts"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vogn/database": "workspace:*",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "tsx": "^4.23.15",
+    "turbo": "^2.11.7",
+    "typescript": "catalog:",
+    "eslint": "catalog:",
+    "@eslint/js": "^9.39.5",
+    "typescript-eslint": "catalog:"
+  }
+}
