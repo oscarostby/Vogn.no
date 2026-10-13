@@ -1,22 +1,31 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware } from '@clerk/nextjs/server';
 import { type NextFetchEvent, type NextRequest, NextResponse } from 'next/server';
 
 /** Pages that require a signed-in user. API routes authenticate inside their handlers (JSON 401s). */
-const isProtectedPage = createRouteMatcher([
-  '/home(.*)',
-  '/crews(.*)',
-  '/messages(.*)',
-  '/garage(.*)',
-  '/events/new(.*)',
-  '/notifications(.*)',
-  '/settings(.*)',
-  '/onboarding(.*)',
-  '/admin(.*)',
-  '/verification(.*)',
-  '/c/:slug/settings(.*)',
-  '/c/:slug/studio(.*)',
-  '/c/:slug/ch(.*)',
-]);
+const PROTECTED_PREFIXES = [
+  '/home',
+  '/crews',
+  '/messages',
+  '/garage',
+  '/events/new',
+  '/notifications',
+  '/settings',
+  '/onboarding',
+  '/admin',
+  '/verification',
+];
+const PROTECTED_CREW_SECTIONS = new Set(['settings', 'studio', 'ch']);
+
+/**
+ * Coarse redirect-to-sign-in for app pages. This is a UX convenience only: every page/layout and API
+ * handler performs its own resource-level authorization check.
+ */
+function isProtectedPage(req: NextRequest): boolean {
+  const path = req.nextUrl.pathname;
+  if (PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) return true;
+  const parts = path.split('/');
+  return parts[1] === 'c' && PROTECTED_CREW_SECTIONS.has(parts[3] ?? '');
+}
 
 const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY);
 

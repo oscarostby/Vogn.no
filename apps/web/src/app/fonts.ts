@@ -27,43 +27,42 @@ import {
 const inter = Inter({ subsets: ['latin', 'latin-ext'], variable: '--font-inter', display: 'swap' });
 const sora = Sora({ subsets: ['latin', 'latin-ext'], variable: '--font-sora', display: 'swap' });
 
-const lazy = { display: 'swap', preload: false } as const;
-const manrope = Manrope({ subsets: ['latin', 'latin-ext'], variable: '--font-manrope', ...lazy });
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin', 'latin-ext'], variable: '--font-space-grotesk', ...lazy });
-const archivo = Archivo({ subsets: ['latin', 'latin-ext'], variable: '--font-archivo', ...lazy });
+const manrope = Manrope({ subsets: ['latin', 'latin-ext'], variable: '--font-manrope', display: 'swap', preload: false });
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin', 'latin-ext'], variable: '--font-space-grotesk', display: 'swap', preload: false });
+const archivo = Archivo({ subsets: ['latin', 'latin-ext'], variable: '--font-archivo', display: 'swap', preload: false });
 const barlowCondensed = Barlow_Condensed({
   subsets: ['latin', 'latin-ext'],
   weight: ['400', '500', '600', '700', '800'],
   variable: '--font-barlow-condensed',
-  ...lazy,
+  display: 'swap', preload: false,
 });
-const bebasNeue = Bebas_Neue({ subsets: ['latin', 'latin-ext'], weight: '400', variable: '--font-bebas-neue', ...lazy });
-const oswald = Oswald({ subsets: ['latin', 'latin-ext'], variable: '--font-oswald', ...lazy });
+const bebasNeue = Bebas_Neue({ subsets: ['latin', 'latin-ext'], weight: '400', variable: '--font-bebas-neue', display: 'swap', preload: false });
+const oswald = Oswald({ subsets: ['latin', 'latin-ext'], variable: '--font-oswald', display: 'swap', preload: false });
 const chakraPetch = Chakra_Petch({
   subsets: ['latin', 'latin-ext'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-chakra-petch',
-  ...lazy,
+  display: 'swap', preload: false,
 });
-const rajdhani = Rajdhani({ subsets: ['latin', 'latin-ext'], weight: ['400', '500', '600', '700'], variable: '--font-rajdhani', ...lazy });
-const orbitron = Orbitron({ subsets: ['latin'], variable: '--font-orbitron', ...lazy });
-const playfair = Playfair_Display({ subsets: ['latin', 'latin-ext'], variable: '--font-playfair-display', ...lazy });
+const rajdhani = Rajdhani({ subsets: ['latin', 'latin-ext'], weight: ['400', '500', '600', '700'], variable: '--font-rajdhani', display: 'swap', preload: false });
+const orbitron = Orbitron({ subsets: ['latin'], variable: '--font-orbitron', display: 'swap', preload: false });
+const playfair = Playfair_Display({ subsets: ['latin', 'latin-ext'], variable: '--font-playfair-display', display: 'swap', preload: false });
 const cormorant = Cormorant_Garamond({
   subsets: ['latin', 'latin-ext'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-cormorant-garamond',
-  ...lazy,
+  display: 'swap', preload: false,
 });
-const dmSerif = DM_Serif_Display({ subsets: ['latin', 'latin-ext'], weight: '400', variable: '--font-dm-serif-display', ...lazy });
-const notoSansJp = Noto_Sans_JP({ subsets: ['latin'], weight: ['400', '500', '700', '900'], variable: '--font-noto-sans-jp', ...lazy });
+const dmSerif = DM_Serif_Display({ subsets: ['latin', 'latin-ext'], weight: '400', variable: '--font-dm-serif-display', display: 'swap', preload: false });
+const notoSansJp = Noto_Sans_JP({ subsets: ['latin'], weight: ['400', '500', '700', '900'], variable: '--font-noto-sans-jp', display: 'swap', preload: false });
 const zenKaku = Zen_Kaku_Gothic_New({
   subsets: ['latin'],
   weight: ['400', '500', '700', '900'],
   variable: '--font-zen-kaku-gothic-new',
-  ...lazy,
+  display: 'swap', preload: false,
 });
-const jetbrains = JetBrains_Mono({ subsets: ['latin', 'latin-ext'], variable: '--font-jetbrains-mono', ...lazy });
-const plexMono = IBM_Plex_Mono({ subsets: ['latin', 'latin-ext'], weight: ['400', '500', '600'], variable: '--font-ibm-plex-mono', ...lazy });
+const jetbrains = JetBrains_Mono({ subsets: ['latin', 'latin-ext'], variable: '--font-jetbrains-mono', display: 'swap', preload: false });
+const plexMono = IBM_Plex_Mono({ subsets: ['latin', 'latin-ext'], weight: ['400', '500', '600'], variable: '--font-ibm-plex-mono', display: 'swap', preload: false });
 
 export const fontVariables = [
   inter,

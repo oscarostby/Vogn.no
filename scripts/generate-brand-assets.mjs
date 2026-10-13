@@ -27,6 +27,12 @@ async function mark(src) {
   return sharp(cropped).trim().png().toBuffer();
 }
 
+/** The "VOGN" letters only (below the mark). */
+async function lettering(src) {
+  const cropped = await sharp(src).extract({ left: 0, top: 570, width: 1280, height: 190 }).png().toBuffer();
+  return sharp(cropped).trim().png().toBuffer();
+}
+
 async function wordmark(src) {
   return sharp(src).trim().png().toBuffer();
 }
@@ -65,6 +71,8 @@ await sharp(whiteMark).toFile(path.join(brandDir, 'vogn-mark-white.png'));
 await sharp(blackMark).toFile(path.join(brandDir, 'vogn-mark-black.png'));
 await sharp(limeMark).toFile(path.join(brandDir, 'vogn-mark-lime.png'));
 await sharp(await wordmark(WHITE)).toFile(path.join(brandDir, 'vogn-wordmark-white.png'));
+await sharp(await lettering(WHITE)).toFile(path.join(brandDir, 'vogn-text-white.png'));
+await sharp(await lettering(BLACK)).toFile(path.join(brandDir, 'vogn-text-black.png'));
 await sharp(await wordmark(BLACK)).toFile(path.join(brandDir, 'vogn-wordmark-black.png'));
 
 // Web app icons (Next.js file conventions + manifest icons)

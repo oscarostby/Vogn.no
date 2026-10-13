@@ -93,9 +93,43 @@ export interface SearchResults {
   vehicles: (VehicleSummary & { owner: UserSummary })[];
 }
 
-export interface WidgetData {
-  [widgetId: string]: unknown;
+/* ------------------------------ widget payloads ------------------------------ */
+
+export interface WidgetPost {
+  id: Id;
+  channelId: Id | null;
+  channelName: string | null;
+  author: UserSummary | null;
+  text: string;
+  createdAt: ISODate;
+  replyCount: number;
+  reactionCount: number;
 }
+
+export interface WidgetVehicle extends VehicleSummary {
+  owner: UserSummary;
+}
+
+/** Server-computed data per widget type (keyed by widget id in `CrewWidgetPayload.data`). */
+export interface WidgetDataByType {
+  announcements: { items: WidgetPost[] };
+  member_count: { members: number; online: number | null; avatars: UserSummary[] };
+  featured_member: { user: UserSummary | null; vehicle: VehicleSummary | null };
+  featured_car: { vehicle: WidgetVehicle | null };
+  vehicle_gallery: { vehicles: WidgetVehicle[] };
+  build_projects: { items: BuildFeedItem[] };
+  upcoming_meets: { events: EventSummary[] };
+  event_calendar: { events: EventSummary[] };
+  countdown: { event: EventSummary | null };
+  poll: PollResult;
+  rules: { items: string[] };
+  leaderboard: { entries: { user: UserSummary; value: number }[]; metric: string };
+  popular_discussions: { items: WidgetPost[] };
+  channel_list: { channels: { id: Id; name: string; type: string; topic: string | null; icon: string | null }[] };
+  stats: { members: number; channels: number; builds: number; events: number; founded: ISODate };
+}
+
+export type WidgetData = Record<string, WidgetDataByType[keyof WidgetDataByType] | undefined>;
 
 export interface CrewWidgetPayload {
   crewId: Id;

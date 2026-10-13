@@ -487,3 +487,63 @@
 [data-motion='reduce'] .ct-effect {
   display: none;
 }
+
+/* Theme-aware logo artwork */
+.logo-on-light {
+  display: none;
+}
+[data-theme='light'] .logo-on-light {
+  display: inline-block;
+}
+[data-theme='light'] .logo-on-dark {
+  display: none;
+}
+@media (prefers-color-scheme: light) {
+  [data-theme='system'] .logo-on-light {
+    display: inline-block;
+  }
+  [data-theme='system'] .logo-on-dark {
+    display: none;
+  }
+}
+
+/* Crew page grid — container queries so Studio previews reflow like real devices. */
+.ct-page {
+  container-type: inline-size;
+}
+.ct-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ct-gap);
+}
+.ct-cell {
+  grid-column: span var(--span-m, 2) / span var(--span-m, 2);
+  grid-row: span var(--row-span, 1) / span var(--row-span, 1);
+  min-width: 0;
+}
+.ct-hide-mobile {
+  display: none;
+}
+@container (min-width: 720px) {
+  .ct-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+  .ct-cell {
+    grid-column: span var(--span-t, 12) / span var(--span-t, 12);
+  }
+  .ct-hide-mobile {
+    display: block;
+  }
+}
+@container (min-width: 1000px) {
+  .ct-cell {
+    grid-column: span var(--span-d, 12) / span var(--span-d, 12);
+  }
+  .ct-hide-desktop {
+    display: none;
+  }
+}
+.ct-section-pad-none { padding-block: 0; }
+.ct-section-pad-sm { padding-block: calc(0.75rem * var(--ct-density, 1)); }
+.ct-section-pad-md { padding-block: calc(1.5rem * var(--ct-density, 1)); }
+.ct-section-pad-lg { padding-block: calc(2.75rem * var(--ct-density, 1)); }
