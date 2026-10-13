@@ -7,7 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, Check, Pencil, Reply, Send, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MediaUploader } from '@/components/app/media-uploader';
+import { UploadButton, useUploadPicker } from '@/components/app/media-uploader';
 import { Markdown } from '@/components/content/markdown';
 import { Button } from '@/components/ui/button';
 import { Avatar, Badge } from '@/components/ui/display';
@@ -54,6 +54,7 @@ export function ChatPanel({ conversationId, canSend = true, canManage = false, c
   const synchronize = useRef<() => void>(() => undefined);
   const pendingSend = useRef<{ fingerprint: string; key: string } | null>(null);
   const readSeq = useRef(-1);
+  const attach = useUploadPicker('message', (media) => setAttachments((prev) => [...prev, media].slice(0, 10)), { contextId: conversationId, multiple: true, disabled: !canSend || !canUpload || sending || attachments.length >= 10 });
 
   const merge = useCallback((incoming: ChatMessage[]) => setMessages((prev) => mergeMessages(prev, incoming)), []);
 
@@ -166,7 +167,8 @@ export function ChatPanel({ conversationId, canSend = true, canManage = false, c
   if (loading && !messages.length) return <ListSkeleton className="p-5" rows={6} />;
   if (error && !messages.length) return <ErrorState error={error} onRetry={() => setRetry((n) => n + 1)} className="m-4" />;
 
-  return <div className="flex h-[min(76dvh,820px)] min-h-[460px] flex-col">
+  return <div {...attach.dropProps} className="relative flex h-[min(76dvh,820px)] min-h-[460px] flex-col">
+    {attach.dragging && <div className="pointer-events-none absolute inset-0 z-20 grid place-items-center rounded-xl border-2 border-dashed border-accent-text bg-bg/80 text-sm font-medium">Drop images to attach</div>}
     <div className="flex items-center justify-between border-b border-line px-4 py-2 text-xs text-muted"><span>{realtime.status === 'connected' ? 'Live updates connected' : 'Updates refresh automatically'}</span><Button size="xs" variant="ghost" onClick={() => synchronize.current()}>Refresh</Button></div>
     {Boolean(error) && <div role="status" className="bg-elevated px-4 py-2 text-xs text-warning">{isApiError(error) ? error.message : 'Connection interrupted. Retrying automatically.'}</div>}
     <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto px-3 py-4 md:px-5" onScroll={(event) => { const element = event.currentTarget; scrollToBottom.current = element.scrollHeight - element.scrollTop - element.clientHeight < 120; }}>
@@ -199,7 +201,7 @@ export function ChatPanel({ conversationId, canSend = true, canManage = false, c
         {reply && <div className="flex items-center gap-2 text-xs text-muted"><span className="flex-1 truncate">Replying to {reply.sender?.displayName}: {reply.content}</span><Button type="button" variant="ghost" size="icon-xs" aria-label="Cancel reply" onClick={() => setReply(null)}><X /></Button></div>}
         {attachments.length > 0 && <div className="flex flex-wrap gap-2">{attachments.map((attachment) => <Badge key={attachment.id}>{attachment.id.slice(-6)}<button type="button" aria-label="Remove attachment" disabled={sending} onClick={() => setAttachments((prev) => prev.filter((media) => media.id !== attachment.id))}><X className="size-3" /></button></Badge>)}</div>}
         <Textarea aria-label="Message" placeholder="Write a message…" maxLength={MESSAGE_MAX_LENGTH} disabled={sending} value={content} onChange={(event) => { setContent(event.target.value); notifyTyping(Boolean(event.target.value)); }} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); void send(event); } }} className="min-h-20 resize-none" />
-        <div className="flex flex-wrap items-center gap-2"><span className="mr-auto text-[11px] text-subtle">Enter to send · Shift+Enter for a new line</span>{canUpload && attachments.length < 10 && !sending && <MediaUploader purpose="message" contextId={conversationId} label="Attach image" className="h-9 flex-row gap-1 rounded-lg border-solid px-3 py-1 text-xs [&_svg]:size-4" onUploaded={(media) => setAttachments((prev) => [...prev, media].slice(0, 10))} />}<Button type="button" size="icon-sm" variant="ghost" aria-label="Jump to latest message" onClick={() => { if (scroller.current) scroller.current.scrollTop = scroller.current.scrollHeight; }}><ArrowDown /></Button><Button type="submit" size="sm" loading={sending} disabled={!content.trim() && !attachments.length}><Send /> Send</Button></div>
+        <div className="flex flex-wrap items-center gap-2"><span className="mr-auto text-[11px] text-subtle">Enter to send · Shift+Enter for a new line</span>{canUpload && attachments.length < 10 && !sending && <UploadButton picker={attach} label="Attach image" className="h-9 flex-row gap-1 rounded-lg border-solid px-3 py-1 text-xs [&_svg]:size-4" />}<Button type="button" size="icon-sm" variant="ghost" aria-label="Jump to latest message" onClick={() => { if (scroller.current) scroller.current.scrollTop = scroller.current.scrollHeight; }}><ArrowDown /></Button><Button type="submit" size="sm" loading={sending} disabled={!content.trim() && !attachments.length}><Send /> Send</Button></div>
       </form> : <p className="text-center text-sm text-muted">You have read access to this channel.</p>}
     </div>
   </div>;

@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { MediaUploader } from '@/components/app/media-uploader';
+import { UploadButton, useUploadPicker } from '@/components/app/media-uploader';
 import { PageContainer } from '@/components/app/page';
 import { Button } from '@/components/ui/button';
 import { SwitchRow, Tabs, TabsList, TabsTrigger } from '@/components/ui/controls';
@@ -18,6 +18,7 @@ import { Field } from '@/components/ui/field';
 import { Input, NativeSelect, Textarea } from '@/components/ui/input';
 import { ErrorState, ListSkeleton, PageHeader, useErrorMessage } from '@/components/ui/states';
 import { api, queryKeys } from '@/lib/api';
+import { cn } from '@/lib/cn';
 import { LOCALE_COOKIE, MOTION_COOKIE, THEME_COOKIE } from '@/lib/config';
 import { isOnboarding, useMe } from '@/lib/hooks';
 
@@ -50,6 +51,7 @@ function SettingsForm({ profile }: { profile: MeProfile }) {
   const router = useRouter();
   const errorMessage = useErrorMessage();
   const saveProfile = useMutation({ mutationFn: (input: unknown) => api.me.update(profileUpdateSchema.parse(input)), onSuccess: (updated) => { qc.setQueryData(queryKeys.me, updated); void qc.invalidateQueries({ queryKey: ['profile'] }); toast.success('Profile saved'); }, onError: (error) => toast.error(errorMessage(error)) });
+  const avatar = useUploadPicker('avatar', (media) => saveProfile.mutate({ avatarMediaId: media.id }));
   const saveSettings = useMutation({ mutationFn: (input: SettingsUpdateInput) => api.me.updateSettings(input), onSuccess: (updated) => { qc.setQueryData(queryKeys.me, updated); setPreferences(updated.settings); applyPreferences(updated); router.refresh(); toast.success('Settings saved'); }, onError: (error) => toast.error(errorMessage(error)) });
   const exportData = useMutation({ mutationFn: () => api.me.exportData(), onSuccess: (data) => { const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const link = document.createElement('a'); link.href = url; link.download = `vogn-${profile.username}-export.json`; link.click(); URL.revokeObjectURL(url); }, onError: (error) => toast.error(errorMessage(error)) });
   const deleteAccount = useMutation({ mutationFn: () => api.me.deleteAccount({ confirmUsername: deleteConfirmation }), onSuccess: () => { qc.clear(); router.replace('/'); router.refresh(); }, onError: (error) => toast.error(errorMessage(error)) });
@@ -59,7 +61,7 @@ function SettingsForm({ profile }: { profile: MeProfile }) {
   return <>
     <Tabs value={tab} onValueChange={setTab} className="mb-6"><TabsList><TabsTrigger value="profile">Profile</TabsTrigger><TabsTrigger value="privacy">Privacy</TabsTrigger><TabsTrigger value="appearance">Appearance</TabsTrigger><TabsTrigger value="notifications">Notifications</TabsTrigger><TabsTrigger value="account">Account</TabsTrigger></TabsList></Tabs>
     {tab === 'profile' && <form className={formClass} onSubmit={(e) => { e.preventDefault(); saveProfile.mutate({ username, displayName, bio: bio || null, website: website || null, country: country || null }); }}>
-      <div className="flex flex-wrap items-center gap-4"><Avatar name={profile.displayName} image={profile.avatar} size="xl" /><MediaUploader purpose="avatar" label="Change avatar" className="p-3" onUploaded={(media) => saveProfile.mutate({ avatarMediaId: media.id })} />{profile.avatar && <Button variant="ghost" size="sm" onClick={() => saveProfile.mutate({ avatarMediaId: null })} type="button" disabled={saveProfile.isPending}>Remove avatar</Button>}</div>
+      <div role="group" aria-label="Avatar" {...avatar.dropProps} className={cn('-m-2.5 flex flex-wrap items-center gap-4 rounded-xl border-2 border-dashed border-transparent p-2 transition', avatar.dragging && 'border-accent-text bg-accent-muted')}><Avatar name={profile.displayName} image={profile.avatar} size="xl" /><UploadButton picker={avatar} label="Change avatar" className="p-3" />{profile.avatar && <Button variant="ghost" size="sm" onClick={() => saveProfile.mutate({ avatarMediaId: null })} type="button" disabled={saveProfile.isPending}>Remove avatar</Button>}</div>
       <Field label="Display name">{(p) => <Input {...p} required value={displayName} maxLength={40} onChange={(e) => setDisplayName(e.target.value)} />}</Field>
       <Field label="Username" help="Usernames can be changed once a week. Your old profile link redirects temporarily.">{(p) => <Input {...p} required minLength={3} maxLength={24} value={username} onChange={(e) => setUsername(e.target.value)} pattern="[A-Za-z0-9_.]+" />}</Field>
       <Field label="Bio" optional>{(p) => <Textarea {...p} maxLength={500} value={bio} onChange={(e) => setBio(e.target.value)} />}</Field>

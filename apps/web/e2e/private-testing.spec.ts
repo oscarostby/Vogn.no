@@ -52,6 +52,20 @@ test('private login, Mongo persistence, image privacy, two-user chat, Studio and
   await a.page.getByLabel('Message', { exact: true }).fill('Durable browser message');
   await a.page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(b.page.getByText('Durable browser message', { exact: true })).toBeVisible();
+  const image = await sharp({ create: { width: 64, height: 64, channels: 3, background: '#c8ff5f' } }).png().toBuffer();
+  const dropped = (fileName: string) => a.page.evaluateHandle(({ bytes, name }) => {
+    const transfer = new DataTransfer();
+    transfer.items.add(new File([new Uint8Array(bytes)], name, { type: 'image/png' }));
+    return transfer;
+  }, { bytes: [...image], name: fileName });
+  const chatFiles = await dropped('dropped-chat.png');
+  await a.page.getByLabel('Message', { exact: true }).dispatchEvent('dragenter', { dataTransfer: chatFiles });
+  await expect(a.page.getByText('Drop images to attach', { exact: true })).toBeVisible();
+  await a.page.getByLabel('Message', { exact: true }).dispatchEvent('drop', { dataTransfer: chatFiles });
+  await expect(a.page.getByRole('button', { name: 'Remove attachment' })).toBeVisible();
+  await expect(a.page.getByText('Drop images to attach', { exact: true })).toHaveCount(0);
+  await a.page.getByRole('button', { name: 'Send', exact: true }).click();
+  await expect(b.page.locator('img[src*="/api/v1/media/test-image/"]')).toBeVisible();
   await b.page.reload();
   await expect(b.page.getByText('Durable browser message', { exact: true })).toBeVisible();
   const member = (await (await b.context.request.get('/api/v1/me')).json()).data;
@@ -60,7 +74,6 @@ test('private login, Mongo persistence, image privacy, two-user chat, Studio and
   await b.page.goto(`/messages/${dm.id}`);
   await expect(b.page.getByText('Private browser DM', { exact: true })).toBeVisible();
   const vehicle = await write(a.context, '/vehicles', { make: 'Toyota', model: 'Supra', visibility: 'private' });
-  const image = await sharp({ create: { width: 64, height: 64, channels: 3, background: '#c8ff5f' } }).png().toBuffer();
   const media = await write(a.context, '/media/test-upload', { purpose: 'vehicle', mime: 'image/png', size: image.length, base64: image.toString('base64') });
   await write(a.context, `/vehicles/${vehicle.id}/gallery`, { mediaIds: [media.id] }, 'PUT');
   expect((await a.context.request.get(media.url)).status()).toBe(200);
@@ -71,6 +84,16 @@ test('private login, Mongo persistence, image privacy, two-user chat, Studio and
     a.page.locator('input[type="file"]').first().setInputFiles({ name: 'avatar.png', mimeType: 'image/png', buffer: image }),
   ]);
   expect(avatarSave.status()).toBe(200);
+  const avatarFiles = await dropped('dropped-avatar.png');
+  const avatarArea = a.page.getByRole('group', { name: 'Avatar' });
+  await avatarArea.dispatchEvent('dragenter', { dataTransfer: avatarFiles });
+  await expect(avatarArea.getByRole('button', { name: 'Drop to upload' })).toBeVisible();
+  const [avatarDrop] = await Promise.all([
+    a.page.waitForResponse((response) => response.url().endsWith('/api/v1/me') && response.request().method() === 'PATCH'),
+    avatarArea.dispatchEvent('drop', { dataTransfer: avatarFiles }),
+  ]);
+  expect(avatarDrop.status()).toBe(200);
+  await expect(avatarArea.getByRole('button', { name: 'Change avatar' })).toBeVisible();
   await a.page.goto(`/c/browser-test-crew/studio`);
   await a.page.getByRole('combobox', { name: 'Preset', exact: true }).selectOption('tokyo-midnight');
   await a.page.getByRole('button', { name: 'Publish', exact: true }).click();

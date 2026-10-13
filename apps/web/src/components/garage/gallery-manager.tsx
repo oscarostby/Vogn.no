@@ -6,13 +6,14 @@ import { CSS } from '@dnd-kit/utilities';
 import type { MediaRef, VehicleDetail } from '@vogn/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { GripVertical, Play, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useErrorMessage } from '@/components/ui/states';
 import { api, queryKeys } from '@/lib/api';
+import { cn } from '@/lib/cn';
 import { mediaUrl } from '@/lib/media';
-import { MediaUploader } from '../app/media-uploader';
+import { UploadButton, useUploadPicker } from '../app/media-uploader';
 
 function Tile({ media, onRemove }: { media: MediaRef; onRemove: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: media.id });
@@ -46,10 +47,14 @@ export function GalleryManager({ vehicle }: { vehicle: VehicleDetail }) {
     onSuccess: (v) => qc.setQueryData(queryKeys.vehicle(v.id), v),
     onError: (e) => toast.error(errorMessage(e)),
   });
+  // Several files dropped at once finish one after another; each must extend the list the previous one saved.
+  const latest = useRef(items);
   const commit = (list: MediaRef[]) => {
+    latest.current = list;
     setItems(list);
     save.mutate(list);
   };
+  const add = useUploadPicker('vehicle', (m) => commit([...latest.current, m]), { accept: 'media', multiple: true, disabled: items.length >= 60 });
   const onDragEnd = (e: DragEndEvent) => {
     if (!e.over || e.active.id === e.over.id) return;
     const from = items.findIndex((m) => m.id === e.active.id);
@@ -57,11 +62,11 @@ export function GalleryManager({ vehicle }: { vehicle: VehicleDetail }) {
     commit(arrayMove(items, from, to));
   };
   return (
-    <section className="grid gap-4 rounded-xl border border-line bg-surface p-5 md:p-6">
+    <section {...add.dropProps} className={cn('grid gap-4 rounded-xl border border-line bg-surface p-5 transition md:p-6', add.dragging && 'border-dashed border-accent-text bg-accent-muted')}>
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-[15px] font-semibold">Gallery</h2>
-          <p className="text-sm text-muted">Up to 60 photos and videos. Drag to reorder — the first image is used when no cover is set.</p>
+          <p className="text-sm text-muted">Up to 60 photos and videos. Drop files here to add them. Drag to reorder — the first image is used when no cover is set.</p>
         </div>
         {save.isPending && <span className="text-xs text-muted">Saving…</span>}
       </div>
@@ -72,7 +77,7 @@ export function GalleryManager({ vehicle }: { vehicle: VehicleDetail }) {
               <Tile key={m.id} media={m} onRemove={() => commit(items.filter((x) => x.id !== m.id))} />
             ))}
             {items.length < 60 && (
-              <MediaUploader purpose="vehicle" accept="media" multiple className="aspect-square" label="Add" onUploaded={(m) => commit([...items, m])} />
+              <UploadButton picker={add} className="aspect-square" label="Add" />
             )}
           </div>
         </SortableContext>

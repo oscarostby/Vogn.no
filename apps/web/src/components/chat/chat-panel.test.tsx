@@ -13,7 +13,7 @@ vi.mock('@/lib/realtime/provider', () => {
   const realtime = { status: 'disabled', onReconnect: () => () => undefined };
   return { useRealtime: () => realtime, useConversationEvents: () => undefined, useTyping: () => ({ typers: [], notifyTyping: () => undefined }) };
 });
-vi.mock('@/components/app/media-uploader', () => ({ MediaUploader: () => null }));
+vi.mock('@/components/app/media-uploader', () => ({ UploadButton: () => null, useUploadPicker: () => ({ input: null, uploading: false, dragging: false, dropProps: {}, open: () => undefined }) }));
 
 const timestamp = '2026-10-13T12:00:00.000Z';
 function message(seq: number, content = `Message ${seq}`, updatedAt = timestamp): ChatMessage {
