@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   description:
     'VOGN is the global community platform for car enthusiasts: customizable crews, digital garages, realtime chat and events.',
   applicationName: 'VOGN',
+  ...(publicConfig.privateTestAuth ? { robots: { index: false, follow: false } } : {}),
   openGraph: {
     type: 'website',
     siteName: 'VOGN',

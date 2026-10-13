@@ -6,9 +6,10 @@ import { LogOut, Moon, Settings, Shield, ShieldCheck, Sun, User } from 'lucide-r
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { Avatar } from '@/components/ui/display';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/menu';
-import { THEME_COOKIE } from '@/lib/config';
+import { publicConfig, THEME_COOKIE } from '@/lib/config';
 import { useProfile } from '@/lib/hooks';
 
 export function setThemePreference(theme: 'dark' | 'light' | 'system') {
@@ -17,9 +18,31 @@ export function setThemePreference(theme: 'dark' | 'light' | 'system') {
 }
 
 export function UserMenu({ side = 'right' }: { side?: 'right' | 'top' | 'bottom' }) {
+  return publicConfig.privateTestAuth ? <PrivateTestUserMenu side={side} /> : <ClerkUserMenu side={side} />;
+}
+
+function ClerkUserMenu({ side }: { side: 'right' | 'top' | 'bottom' }) {
+  const clerk = useClerk();
+  return <UserMenuContent side={side} onSignOut={() => clerk.signOut({ redirectUrl: '/' })} />;
+}
+
+function PrivateTestUserMenu({ side }: { side: 'right' | 'top' | 'bottom' }) {
+  const router = useRouter();
+  return <UserMenuContent side={side} onSignOut={async () => {
+    try {
+      const result = await fetch('/api/test-auth/session', { method: 'DELETE' });
+      if (!result.ok) throw new Error('Could not sign out. Please try again.');
+      router.replace('/');
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not sign out.');
+    }
+  }} />;
+}
+
+function UserMenuContent({ side, onSignOut }: { side: 'right' | 'top' | 'bottom'; onSignOut: () => Promise<unknown> }) {
   const me = useProfile();
   const t = useTranslations();
-  const clerk = useClerk();
   const router = useRouter();
   if (!me) return <span className="size-9 animate-pulse-soft rounded-full bg-elevated" />;
   const isLight = typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light';
@@ -58,7 +81,7 @@ export function UserMenu({ side = 'right' }: { side?: 'right' | 'top' | 'bottom'
           {isLight ? t('common.dark') : t('common.light')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem icon={<LogOut />} destructive onSelect={() => void clerk.signOut({ redirectUrl: '/' })}>
+        <DropdownMenuItem icon={<LogOut />} destructive onSelect={() => void onSignOut()}>
           {t('common.signOut')}
         </DropdownMenuItem>
       </DropdownMenuContent>

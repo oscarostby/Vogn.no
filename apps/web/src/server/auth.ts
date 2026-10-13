@@ -4,6 +4,8 @@ import type { Database } from './db';
 import { getEnv, isConfigured, missingVars } from './env';
 import { configMissing } from './errors';
 import { type Actor, actorFromUser } from './context';
+import { getDatabase } from './db';
+import { privateTestIdentityFromRequest } from './private-test-auth';
 
 export interface AuthState {
   clerkUserId: string | null;
@@ -24,7 +26,8 @@ export function setTestAuthResolver(resolver: ((req: Request) => string | null) 
 /** Resolves the Clerk session (cookie for web, `Authorization: Bearer` for mobile). */
 export async function getClerkUserId(req: Request): Promise<string | null> {
   if (testAuth && getEnv().NODE_ENV === 'test') return testAuth(req);
-  if (!isConfigured('auth')) throw configMissing('Authentication (Clerk)', missingVars('auth'));
+  if (!isConfigured('auth')) throw configMissing('Authentication', missingVars('auth'));
+  if (getEnv().TEST_AUTH_ENABLED) return privateTestIdentityFromRequest(req, await getDatabase());
   const { userId } = await auth();
   return userId ?? null;
 }

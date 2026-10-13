@@ -1,5 +1,6 @@
 import 'server-only';
 import { z } from 'zod';
+import { PRIVATE_TEST_DEFAULTS } from './private-test-defaults';
 
 const optional = z
   .string()
@@ -29,6 +30,12 @@ const schema = z.object({
   CLERK_SECRET_KEY: optional,
   CLERK_WEBHOOK_SIGNING_SECRET: optional,
   CLERK_AUTHORIZED_PARTIES: csv,
+
+  /** Explicit, password-gated private testing mode. Never enabled by missing Clerk keys. */
+  TEST_AUTH_ENABLED: bool(false),
+  NEXT_PUBLIC_TEST_AUTH_ENABLED: bool(false),
+  TEST_AUTH_PASSWORD: optional,
+  TEST_MEDIA_ENABLED: bool(false),
 
   ABLY_API_KEY: optional,
 
@@ -71,9 +78,15 @@ export type Env = z.infer<typeof schema>;
 
 let cached: Env | null = null;
 
+/** Explicit committed private-test defaults; isolated tests never inherit the real database or keys. */
+export function environmentInput(raw: Record<string, string | undefined> = process.env) {
+  const configured = Object.fromEntries(Object.entries(raw).filter(([, value]) => value !== undefined && value !== ''));
+  return raw.NODE_ENV === 'test' ? configured : { ...PRIVATE_TEST_DEFAULTS, ...configured };
+}
+
 export function getEnv(): Env {
   if (cached) return cached;
-  const parsed = schema.safeParse(process.env);
+  const parsed = schema.safeParse(environmentInput());
   if (!parsed.success) {
     // Fail loudly with names only — never echo values.
     const names = parsed.error.issues.map((i) => i.path.join('.')).join(', ');
@@ -118,6 +131,13 @@ export const INTEGRATION_VARS: Record<Integration, (keyof Env)[]> = {
 };
 
 export function missingVars(integration: Integration, env: Env = getEnv()): string[] {
+  if (integration === 'auth' && env.TEST_AUTH_ENABLED) {
+    const missing: string[] = [];
+    if (!env.NEXT_PUBLIC_TEST_AUTH_ENABLED) missing.push('NEXT_PUBLIC_TEST_AUTH_ENABLED');
+    if (!env.TEST_AUTH_PASSWORD || env.TEST_AUTH_PASSWORD.length < 16) missing.push('TEST_AUTH_PASSWORD');
+    if (!env.APP_SIGNING_SECRET || env.APP_SIGNING_SECRET.length < 32) missing.push('APP_SIGNING_SECRET');
+    return missing;
+  }
   return INTEGRATION_VARS[integration].filter((key) => !env[key]);
 }
 
@@ -130,8 +150,8 @@ export const REQUIRED_INTEGRATIONS: Integration[] = ['database', 'auth', 'encryp
 export function integrationStatus(env: Env = getEnv()) {
   return (Object.keys(INTEGRATION_VARS) as Integration[]).map((name) => ({
     name,
-    configured: isConfigured(name, env),
+    configured: name === 'media' && env.TEST_MEDIA_ENABLED && env.TEST_AUTH_ENABLED ? true : isConfigured(name, env),
     required: REQUIRED_INTEGRATIONS.includes(name),
-    missing: missingVars(name, env),
+    missing: name === 'media' && env.TEST_MEDIA_ENABLED && env.TEST_AUTH_ENABLED ? [] : missingVars(name, env),
   }));
 }

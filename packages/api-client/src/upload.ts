@@ -27,7 +27,23 @@ export async function uploadMedia(
   appendFile: (form: FormData) => void,
   fetchImpl: typeof fetch = globalThis.fetch.bind(globalThis),
 ): Promise<UploadedMedia> {
-  const signed = await api.media.sign(input);
+  let signed;
+  try {
+    signed = await api.media.sign(input);
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.code !== 'CONFIG_MISSING') throw error;
+    // An explicitly enabled private test server can store small images in MongoDB.
+    // The server enforces the mode, authorization and image validation.
+    const testForm = new FormData();
+    appendFile(testForm);
+    const file = testForm.get('file');
+    if (!(file instanceof Blob)) throw error;
+    if (file.size > 2 * 1024 * 1024) throw new ApiError('PAYLOAD_TOO_LARGE', 'Private test images must be smaller than 2 MB.', 413);
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    let binary = '';
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    return api.http.post<UploadedMedia>('/media/test-upload', { ...input, base64: btoa(binary) });
+  }
   if (input.size > signed.maxBytes) throw new ApiError('PAYLOAD_TOO_LARGE', 'File is too large', 413);
 
   const form = new FormData();

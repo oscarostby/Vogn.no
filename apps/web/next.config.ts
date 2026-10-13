@@ -4,6 +4,9 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const isDev = process.env.NODE_ENV !== 'production';
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+// This flag is public. Database credentials and signing/encryption keys stay in server-only modules.
+const privateTestFlag = process.env.NEXT_PUBLIC_TEST_AUTH_ENABLED || process.env.TEST_AUTH_ENABLED || 'true';
 
 /**
  * Content Security Policy. Clerk, Ably, Cloudinary, R2 and LiveKit are the only third parties the browser
@@ -43,6 +46,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  env: { NEXT_PUBLIC_APP_URL: appUrl, NEXT_PUBLIC_TEST_AUTH_ENABLED: privateTestFlag },
   transpilePackages: [
     '@vogn/api-client',
     '@vogn/database',

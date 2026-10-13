@@ -90,3 +90,37 @@ other locales fall back key-by-key to English.
 
 Integration tests use `mongodb-memory-server` as a single-node replica set (transactions supported). Tests never
 touch the Atlas cluster configured in `.env.local`.
+
+## ADR-014 — Explicit private testing without provider accounts (2026-10-13)
+
+The owner requested a hosted private test version before provisioning Clerk and media/realtime accounts.
+This adds an explicit alternative to ADR-003's default closed behavior: both `TEST_AUTH_ENABLED` and
+`NEXT_PUBLIC_TEST_AUTH_ENABLED` must be enabled, with a separate long `TEST_AUTH_PASSWORD` and signing key.
+Missing Clerk keys alone never enable it. A stable test login name maps to an isolated `test:<uuid>` identity
+in MongoDB. Signed, expiring HttpOnly cookies authenticate normal service calls; the same permissions,
+input validation, rate limits, profile checks and origin checks still apply. Optional data APIs also require
+a session in this private mode. Changing the password invalidates existing cookies, and account deletion
+revokes the identity. Shared test credentials are for trusted testers and must be replaced with Clerk for
+public registration.
+
+`TEST_MEDIA_ENABLED` additionally allows small images in MongoDB. Images are decoded, resized and converted
+to WebP with metadata removed. Reads require authentication and the actual profile/vehicle/conversation
+access, and unattached images remain owner-only. This is persistent on Vercel and uses no local upload disk.
+Cloudinary remains the normal media provider. Chat uses the existing MongoDB sync API when Ably is missing.
+
+Vercel secrets are imported from an ignored local environment export. The first database connection creates
+the declared indexes. Production browser tests use an isolated replica set, not the owner's Atlas records.
+
+## ADR-015 — Committed server-only defaults for the owner's private test deployment (2026-10-13)
+
+The owner explicitly requested hardcoding all current test credentials and pushing the private repository
+so hosting needs no environment-variable import. This supersedes ADR-014's secret-import requirement for
+this throwaway test build. `server/private-test-defaults.ts` contains the existing test settings and has a
+`server-only` boundary; `getEnv()` merges environment overrides over those defaults. The proxy uses the same
+resolved signing key and test password as API session validation. Only the public test-mode flag is included
+in Next.js client environment configuration. Defaults are excluded under `NODE_ENV=test`.
+
+The no-environment production verification builds without `.env.local`, checks Atlas health, private page
+redirects and real test login, then scans browser JavaScript bundles for all server credential values. A
+future public launch must replace the test credentials and remove the committed defaults. External provider
+keys that were not supplied remain unconfigured; source defaults cannot provision those provider accounts.

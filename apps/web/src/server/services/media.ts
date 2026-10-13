@@ -47,7 +47,7 @@ function maxBytesFor(kind: 'image' | 'video' | 'file'): number {
 const resourceTypeFor = (kind: 'image' | 'video' | 'file'): ResourceType => (kind === 'file' ? 'raw' : kind);
 
 /** Purpose-specific authorization: uploading into a crew or conversation requires access there. */
-async function authorizeContext(ctx: AuthedContext, purpose: string, contextId: string | undefined): Promise<ObjectId | null> {
+export async function authorizeContext(ctx: AuthedContext, purpose: string, contextId: string | undefined): Promise<ObjectId | null> {
   if (['crew_icon', 'crew_banner', 'crew_media', 'theme_background', 'event_cover'].includes(purpose)) {
     if (!contextId) {
       // New crews: icon/banner can be uploaded before the crew exists.
@@ -230,7 +230,8 @@ export async function deleteMedia(ctx: AuthedContext, id: ObjectId, options: { f
   if (!options.force && !doc.ownerId.equals(ctx.actor.userId)) throw notFound('Media');
   await ctx.cols.mediaAssets.updateOne({ _id: id }, { $set: { status: 'deleting', updatedAt: ctx.now } });
   try {
-    await destroyAsset(doc.publicId, doc.resourceType);
+    if (doc.provider === 'mongo-test') await ctx.db.collection('privateTestMedia').deleteOne({ _id: doc._id });
+    else await destroyAsset(doc.publicId, doc.resourceType);
     await ctx.cols.mediaAssets.updateOne({ _id: id }, { $set: { status: 'deleted', updatedAt: new Date() } });
   } catch (error) {
     // Left in "deleting" for the cleanup cron to retry.

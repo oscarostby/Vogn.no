@@ -222,9 +222,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <NavRail onSearch={openSearch} />
           <div className="flex min-w-0 flex-1 flex-col">
             <MobileBar onSearch={openSearch} onMenu={() => setDrawerOpen(true)} />
-            <div id="main" className="min-h-0 flex-1 overflow-y-auto pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
+            <main id="main" className="min-h-0 flex-1 overflow-y-auto pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
               {children}
-            </div>
+            </main>
           </div>
           <BottomTabs />
         </div>

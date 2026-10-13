@@ -1,0 +1,36 @@
+import type { ReportDto } from '@vogn/types';
+import { ObjectId } from 'mongodb';
+import { beforeAll, afterAll, it, expect } from 'vitest';
+import * as stats from '@/app/api/v1/admin/stats/route';
+import * as reports from '@/app/api/v1/admin/reports/route';
+import * as review from '@/app/api/v1/admin/reports/[id]/route';
+import * as create from '@/app/api/v1/reports/route';
+import { call, createUser, startHarness, type Harness } from '@/test/harness';
+let h: Harness;
+beforeAll(async () => { h = await startHarness(); });
+afterAll(async () => { await h?.stop(); });
+it('rejects anonymous and ordinary users before exposing admin stats or report excerpts', async () => {
+  const user = await createUser();
+  expect((await call(stats.GET)).status).toBe(401);
+  expect((await call(stats.GET, { as: user.clerkId })).status).toBe(403);
+  expect((await call(reports.GET, { as: user.clerkId })).status).toBe(403);
+  expect((await call(review.POST, { as: user.clerkId, params: { id: new ObjectId().toHexString() }, body: { status: 'dismissed' } })).status).toBe(403);
+});
+it('allows staff to review a persisted report, moves the queue and records an audit entry', async () => {
+  const admin = await createUser();
+  const reporter = await createUser();
+  const target = await createUser();
+  await h.db.db.collection('users').updateOne({ _id: new ObjectId(admin.id) }, { $set: { platformRole: 'admin' } });
+  const created = await call<{ id: string }>(create.POST, { as: reporter.clerkId, body: { targetType: 'user', targetId: target.id, reason: 'spam', details: 'Test report' } });
+  expect(created.status).toBe(201);
+  const before = await call<ReportDto[]>(reports.GET, { as: admin.clerkId });
+  expect(before.data.some((r) => r.id === created.data.id)).toBe(true);
+  const result = await call<ReportDto>(review.POST, { as: admin.clerkId, params: { id: created.data.id }, body: { status: 'dismissed', resolution: 'Private testing' } });
+  expect(result.status).toBe(200);
+  expect(result.data.resolution).toBe('Private testing');
+  expect(result.data.resolvedAt).not.toBeNull();
+  const after = await call<ReportDto[]>(reports.GET, { as: admin.clerkId });
+  expect(after.data.some((r) => r.id === created.data.id)).toBe(false);
+  expect(await h.db.db.collection('auditLogs').countDocuments({ action: 'report.reviewed', actorId: new ObjectId(admin.id) })).toBe(1);
+  expect((await call(stats.GET, { as: admin.clerkId })).status).toBe(200);
+});

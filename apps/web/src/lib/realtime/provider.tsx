@@ -161,7 +161,7 @@ export function useRealtime(): RealtimeContextValue {
 export function useConversationEvents(conversationId: string | null, handler: (event: ConversationEvent) => void) {
   const { status, getClient, addInterest, ready } = useRealtime();
   const handlerRef = useRef(handler);
-  handlerRef.current = handler;
+  useEffect(() => { handlerRef.current = handler; }, [handler]);
   const live = status === 'connected' || status === 'connecting' || status === 'disconnected';
   useEffect(() => {
     if (!conversationId || !live) return;
@@ -188,7 +188,7 @@ export function useConversationEvents(conversationId: string | null, handler: (e
 export function useUserEvents(handler: (event: UserEvent) => void) {
   const { status, getClient, userId } = useRealtime();
   const handlerRef = useRef(handler);
-  handlerRef.current = handler;
+  useEffect(() => { handlerRef.current = handler; }, [handler]);
   useEffect(() => {
     if (!userId || status !== 'connected') return;
     const client = getClient();

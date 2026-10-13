@@ -1,6 +1,9 @@
 import 'server-only';
 import { clerkClient } from '@clerk/nextjs/server';
 import { getEnv } from '../env';
+import { getDatabase } from '../db';
+import { privateTestIdentities, privateTestAuthEnabled } from '../private-test-auth';
+import { isPrivateTestIdentity } from '../test-session';
 
 export interface ClerkUserInfo {
   emailVerified: boolean;
@@ -19,6 +22,12 @@ export function setClerkInfoForTests(fn: typeof override): void {
  * real name into VOGN's database: Clerk remains the only store of those identifiers.
  */
 export async function getClerkUserInfo(clerkUserId: string): Promise<ClerkUserInfo> {
+  if (isPrivateTestIdentity(clerkUserId)) {
+    if (!privateTestAuthEnabled()) throw new Error('Private testing authentication is disabled');
+    const identity = await privateTestIdentities(await getDatabase()).findOne({ identityId: clerkUserId });
+    if (!identity) throw new Error('Private testing identity no longer exists');
+    return { emailVerified: false, phoneVerified: false, username: identity._id };
+  }
   if (override) return override(clerkUserId);
   const client = await clerkClient();
   const user = await client.users.getUser(clerkUserId);
@@ -32,6 +41,10 @@ export async function getClerkUserInfo(clerkUserId: string): Promise<ClerkUserIn
 }
 
 export async function deleteClerkUser(clerkUserId: string): Promise<void> {
+  if (isPrivateTestIdentity(clerkUserId)) {
+    await privateTestIdentities(await getDatabase()).deleteOne({ identityId: clerkUserId });
+    return;
+  }
   if (override) return;
   const client = await clerkClient();
   await client.users.deleteUser(clerkUserId);

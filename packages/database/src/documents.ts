@@ -12,7 +12,6 @@ import type {
   CrewPermission,
   CrewRequirements,
   CrewVisibility,
-  DmPrivacy,
   Drivetrain,
   EventStatus,
   EventVisibility,
@@ -679,7 +678,7 @@ export interface AuditLogDoc {
 export interface MediaAssetDoc extends Timestamps {
   _id: ObjectId;
   ownerId: ObjectId;
-  provider: 'cloudinary' | 'r2';
+  provider: 'cloudinary' | 'r2' | 'mongo-test';
   publicId: string;
   resourceType: 'image' | 'video' | 'raw';
   kind: MediaKind;

@@ -10,7 +10,7 @@
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "node ../../scripts/run-e2e.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.14",

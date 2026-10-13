@@ -2,7 +2,47 @@
 
 Read `PLAN.md` (architecture) and `DECISIONS.md` (rationale) first. Last updated: 2026-10-13.
 
-## Phase status
+## Private web testing checkpoint (2026-10-13)
+
+The owner requested a working private hosted test version. New work since the original checkpoint:
+
+- Explicit password-gated private test authentication, persistent isolated identities, onboarding, logout,
+  expiry/rotation/deletion revocation, and private access to otherwise public data APIs.
+- MongoDB Atlas credentials stored in server-only committed test defaults at the owner's explicit request; connectivity and all 41 indexed
+  collections verified. The local database is `vogn_dev`. Test owner login `oscar` is prepared; onboarding
+  creates its profile with admin access from the explicit local bootstrap allowlist.
+- Working crews/create/overview/channel pages, membership/application/invite controls, MongoDB chat polling
+  and DMs, message send/retry/history/edit/delete/reply/reactions and image attachments.
+- Discovery, events create/detail/RSVP/waitlist/calendar/cancel, notifications, profile/privacy/appearance
+  settings, data export/deletion, legal draft pages, report creation and a basic staff report review dashboard.
+- Crew Studio with presets/colors/full JSON editing/preview and draft/publish/immutable versions/restore/
+  import/export APIs. This is a basic editor; drag/drop layout, fully live data for every widget, polls,
+  marketplace and advanced editor tools remain roadmap items.
+- Optional sanitized MongoDB image storage (2 MB limit) for private testing without Cloudinary.
+- Vercel configuration, daily authenticated maintenance, env export, README and `docs/deployment.md`.
+
+Verified: `pnpm check` passes across all 10 packages (115 tests; lint has 0 errors and 3 warnings).
+Next.js production build passes. Playwright passes one complete two-browser production flow using an isolated
+MongoDB replica set: private login/onboarding, crew creation/join, chat surviving reload, DM delivery, private
+image access, actual avatar upload fallback, Studio publication, all main routes, mobile width and no browser
+runtime errors. Atlas `db:check` reports connected with no missing indexes.
+The local production HTTP health probe against the real Atlas cluster returns `status: "ok"`,
+`database.ok: true` and all required integrations configured.
+
+Not verified: actual Vercel deployment/Atlas network access from Vercel, normal Clerk sessions, or live
+Cloudinary/Ably/R2/LiveKit/Statens vegvesen accounts. Verification is an honest capability/status page;
+submission/review workflows and the official lookup adapter remain unimplemented. Mobile remains unbuilt.
+No environment import is needed for the private web test build. Root Directory: `apps/web`.
+The owner explicitly requested committing all existing test credentials in
+`apps/web/src/server/private-test-defaults.ts`. Environment overrides still work. `NODE_ENV=test` excludes
+these defaults so automated tests never inherit real Atlas credentials. A production build with `.env.local`
+temporarily absent passed the Atlas HTTP health, unauthenticated page guard and actual test login checks.
+All 61 client JavaScript bundles were scanned and contain none of the server credential values.
+
+The original phase snapshot below is preserved for architectural context; the checkpoint above supersedes
+its pending web UI/auth/setup notes.
+
+## Original phase status
 
 | Phase | State |
 | --- | --- |

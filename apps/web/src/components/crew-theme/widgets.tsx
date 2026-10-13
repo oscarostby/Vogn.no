@@ -174,7 +174,6 @@ function PostRow({ post, locale }: { post: WidgetPost; locale: string }) {
 function Countdown({ event, label, locale }: { event: EventSummary | null; label: string; locale: string }) {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
-    setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);

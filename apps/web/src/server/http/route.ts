@@ -2,7 +2,7 @@ import 'server-only';
 import { negotiateLocale } from '@vogn/i18n';
 import type { ApiErrorBody, ApiSuccessBody } from '@vogn/types';
 import { randomUUID, timingSafeEqual } from 'node:crypto';
-import { type ZodType, z } from 'zod';
+import { type ZodType, ZodError, z } from 'zod';
 import { resolveAuth } from '../auth';
 import { createContext, type ServiceContext } from '../context';
 import { requestFingerprint } from '../crypto';
@@ -73,9 +73,13 @@ function allowedOrigins(): Set<string> {
  */
 function checkOrigin(req: Request): void {
   if (!MUTATING.has(req.method)) return;
-  if (req.headers.get('authorization')?.startsWith('Bearer ')) return;
+  if (!getEnv().TEST_AUTH_ENABLED && req.headers.get('authorization')?.startsWith('Bearer ')) return;
   const origin = req.headers.get('origin');
   const requestOrigin = new URL(req.url).origin;
+  if (getEnv().TEST_AUTH_ENABLED) {
+    if (origin !== requestOrigin || req.headers.get('sec-fetch-site') === 'cross-site') throw forbidden('Cross-origin request blocked.');
+    return;
+  }
   if (origin) {
     if (origin !== requestOrigin && !allowedOrigins().has(origin)) throw forbidden('Cross-origin request blocked.');
     return;
@@ -101,6 +105,7 @@ function json(body: unknown, status: number, requestId: string, headers: Record<
 }
 
 export function errorResponse(error: unknown, requestId: string): Response {
+  if (error instanceof ZodError) return errorResponse(validationError(error), requestId);
   if (error instanceof AppError) {
     const body: ApiErrorBody = {
       error: { code: error.code, message: error.message, details: error.details, requestId },
@@ -170,7 +175,7 @@ export function route<P extends Record<string, string> = Record<string, string>,
         const state = await resolveAuth(req, database);
         clerkUserId = state.clerkUserId;
         actor = state.actor;
-        if (config.auth === 'required') {
+        if (config.auth === 'required' || getEnv().TEST_AUTH_ENABLED) {
           if (!clerkUserId) throw unauthenticated();
           if (!actor && !config.allowWithoutProfile) {
             throw new AppError('ONBOARDING_REQUIRED', 'Complete onboarding first.');

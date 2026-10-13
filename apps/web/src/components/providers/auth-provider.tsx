@@ -26,10 +26,10 @@ const appearance = {
 
 /**
  * Wraps the tree in ClerkProvider only when Clerk is configured. Without keys the app renders public pages
- * and shows a configuration screen for protected areas (see proxy.ts) — it never runs in a keyless mode.
+ * and shows a configuration screen unless explicit password-gated private testing mode is enabled.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  if (!publicConfig.clerkConfigured) return <>{children}</>;
+  if (publicConfig.privateTestAuth || !publicConfig.clerkConfigured) return <>{children}</>;
   return (
     <ClerkProvider
       appearance={appearance}
