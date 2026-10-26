@@ -1,6 +1,40 @@
 # VOGN — Progress (resumable checkpoint)
 
-Read `PLAN.md` (architecture) and `DECISIONS.md` (rationale) first. Last updated: 2026-10-13.
+Read `PLAN.md` (architecture) and `DECISIONS.md` (rationale) first. Last updated: 2026-10-26.
+
+## Personal accounts (2026-10-26)
+
+Deployment follow-up: the owner selected `https://vognno.vercel.app` and explicitly requested a GitHub
+push without requiring env files. Clerk and Vegvesen server defaults now accompany the existing database
+defaults; only public configuration is exposed to browser bundles. Environment overrides remain supported.
+OAuth uses the current origin, and Vercel deployment URLs are detected automatically. Legacy shared-password
+login and signed test sessions are disabled by default. The connected Clerk instance is still development;
+production OAuth requires the provider credentials and domain setup described in `docs/deployment.md`.
+The latest source checks pass all 99 web tests; isolated tests never inherit the committed real credentials.
+Next.js and its ESLint configuration are patched to 16.4.1. A production build with both local env files
+temporarily removed passed TypeScript, the real Atlas health probe, sign-in rendering with Google/Apple,
+unauthenticated API rejection (401), and rejection of the disabled legacy login (404). All 65 browser
+JavaScript files were checked against seven server credential values with no matches. All three production
+browser flows pass after the patch; ESLint has zero errors and the same three existing warnings. Local env
+files were restored after the check and remain ignored by Git. The localhost dev server was restarted.
+
+Follow-up: Norwegian plate lookup now fills editable car details through Statens vegvesen, using the key
+the owner explicitly asked to hardcode. Google and Apple are connected to the owner's existing Clerk app
+alongside local accounts; a new development key was created after the owner's email confirmation and
+stored in the ignored `.env.local`. Both social providers were already enabled in that development app.
+Clerk backend access returned HTTP 200. All 95 web tests and three production browser tests pass,
+including lookup/autofill/edit/save. A complete login using a real Google/Apple user has not been automated.
+
+Registration now accepts a login name and an individual password, followed by the existing onboarding.
+Login returns to the same profile and no longer creates identities. Salted scrypt hashes and random,
+hashed MongoDB sessions protect personal accounts independently of the committed test signing key.
+Logout revokes the current session; account deletion removes all sessions. Existing invited test
+identities still work, while the legacy test endpoint and signed test cookies cannot open personal accounts.
+
+Verified: web TypeScript and production build pass; all 82 web tests pass; ESLint has no errors and the
+same three existing warnings. Browser tests pass for personal signup/password confirmation, onboarding,
+wrong-password rejection, logout/relogin/persistence, and the existing two-user chat/media/Studio flow.
+The development server remains running at `http://localhost:3000`. Changes are local and not deployed.
 
 ## Private web testing checkpoint (2026-10-13)
 

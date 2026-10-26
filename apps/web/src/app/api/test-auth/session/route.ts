@@ -7,7 +7,8 @@ import { getDatabase } from '@/server/db';
 import { requestFingerprint } from '@/server/crypto';
 import { enforceRateLimit } from '@/server/rate-limit';
 import { checkPrivateTestOrigin, getOrCreatePrivateTestIdentity, privateTestAuthEnabled, privateTestIdentityFromRequest, requirePrivateTestAuth } from '@/server/private-test-auth';
-import { matchesTestPassword, signTestSession, TEST_SESSION_COOKIE, TEST_SESSION_SECONDS } from '@/server/test-session';
+import { matchesTestPassword, signTestSession, testSessionCookieFromRequest, TEST_SESSION_COOKIE, TEST_SESSION_SECONDS } from '@/server/test-session';
+import { revokeAccountSession } from '@/server/account-sessions';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -34,7 +35,7 @@ type RouteHandler = (req: Request, segment: { params: Promise<Record<string, str
 function testingOnly(handler: RouteHandler, mutation = false) {
   return async (req: Request, segment: { params: Promise<Record<string, string | string[] | undefined>> }): Promise<Response> => {
     try {
-      if (!privateTestAuthEnabled()) throw new AppError('NOT_FOUND', 'Not found.');
+      if (!privateTestAuthEnabled() || !getEnv().LEGACY_TEST_AUTH_ENABLED) throw new AppError('NOT_FOUND', 'Not found.');
       requirePrivateTestAuth();
       if (mutation) checkPrivateTestOrigin(req);
       return await handler(req, segment);
@@ -64,4 +65,7 @@ export const GET = testingOnly(route({ auth: 'none' }, async ({ req }) => {
   return response({ signedIn: Boolean(identity) });
 }));
 
-export const DELETE = testingOnly(route({ auth: 'none' }, async ({ req }) => response({ signedIn: false }, cookie('', 0, req))), true);
+export const DELETE = testingOnly(route({ auth: 'none' }, async ({ req }) => {
+  await revokeAccountSession(await getDatabase(), testSessionCookieFromRequest(req));
+  return response({ signedIn: false }, cookie('', 0, req));
+}), true);

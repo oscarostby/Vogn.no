@@ -1,7 +1,9 @@
+import './server/clerk-defaults';
 import { clerkMiddleware } from '@clerk/nextjs/server';
 import { type NextFetchEvent, type NextRequest, NextResponse } from 'next/server';
 import { TEST_SESSION_COOKIE, verifyTestSession } from './server/test-session';
-import { getEnv } from './server/env';
+import { clerkAuthConfigured, getEnv } from './server/env';
+import { isAccountSessionToken } from './server/account-sessions';
 
 /** Pages that require a signed-in user. API routes authenticate inside their handlers (JSON 401s). */
 const PROTECTED_PREFIXES = [
@@ -30,13 +32,14 @@ function isProtectedPage(req: NextRequest): boolean {
   return parts[1] === 'c' && PROTECTED_CREW_SECTIONS.has(parts[3] ?? '');
 }
 
-const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY);
+const clerkConfigured = clerkAuthConfigured();
 
-function authorizedParties(): string[] {
+function authorizedParties(req: NextRequest): string[] {
   const parties = new Set<string>();
-  const app = process.env.NEXT_PUBLIC_APP_URL;
+  parties.add(new URL(req.url).origin);
+  const app = getEnv().NEXT_PUBLIC_APP_URL;
   if (app) parties.add(new URL(app).origin);
-  for (const p of (process.env.CLERK_AUTHORIZED_PARTIES ?? '').split(',')) {
+  for (const p of getEnv().CLERK_AUTHORIZED_PARTIES) {
     const trimmed = p.trim();
     if (trimmed) parties.add(trimmed);
   }
@@ -45,20 +48,34 @@ function authorizedParties(): string[] {
 
 const withClerk = clerkMiddleware(
   async (auth, req) => {
-    if (isProtectedPage(req)) await auth.protect();
+    if (!isProtectedPage(req)) return;
+    const env = getEnv();
+    const token = req.cookies.get(TEST_SESSION_COOKIE)?.value;
+    if (env.TEST_AUTH_ENABLED && env.NEXT_PUBLIC_TEST_AUTH_ENABLED &&
+      (isAccountSessionToken(token) || (env.LEGACY_TEST_AUTH_ENABLED && verifyTestSession(token, env.APP_SIGNING_SECRET, env.TEST_AUTH_PASSWORD)))) return;
+    const { userId } = await auth();
+    if (!userId) {
+      const url = new URL('/sign-in', req.url);
+      url.searchParams.set('redirect_url', req.nextUrl.pathname + req.nextUrl.search);
+      return NextResponse.redirect(url);
+    }
   },
-  { authorizedParties: authorizedParties() },
+  (req) => ({ authorizedParties: authorizedParties(req) }),
 );
 
 export default function proxy(req: NextRequest, event: NextFetchEvent) {
+  // Clerk must run on every request when configured, including requests using local accounts.
+  if (clerkConfigured) return withClerk(req, event);
   const env = getEnv();
   if (env.TEST_AUTH_ENABLED) {
     const configured = env.NEXT_PUBLIC_TEST_AUTH_ENABLED &&
       (env.TEST_AUTH_PASSWORD?.length ?? 0) >= 16 && (env.APP_SIGNING_SECRET?.length ?? 0) >= 32;
     if (isProtectedPage(req)) {
       if (!configured) return NextResponse.redirect(new URL('/setup-required', req.url));
-      const identity = verifyTestSession(req.cookies.get(TEST_SESSION_COOKIE)?.value, env.APP_SIGNING_SECRET, env.TEST_AUTH_PASSWORD);
-      if (!identity) {
+      const token = req.cookies.get(TEST_SESSION_COOKIE)?.value;
+      // Opaque sessions are validated in MongoDB by page guards and API authentication.
+      const identity = env.LEGACY_TEST_AUTH_ENABLED && verifyTestSession(token, env.APP_SIGNING_SECRET, env.TEST_AUTH_PASSWORD);
+      if (!identity && !isAccountSessionToken(token)) {
         const url = new URL('/sign-in', req.url);
         url.searchParams.set('redirect_url', req.nextUrl.pathname + req.nextUrl.search);
         return NextResponse.redirect(url);

@@ -1,6 +1,9 @@
 import 'server-only';
 import { z } from 'zod';
 import { PRIVATE_TEST_DEFAULTS } from './private-test-defaults';
+import { VEGVESEN_DEFAULTS } from './vegvesen-defaults';
+import { CLERK_DEFAULTS } from './clerk-defaults';
+import { PUBLIC_DEFAULTS } from '../config/public-defaults';
 
 const optional = z
   .string()
@@ -27,6 +30,7 @@ const schema = z.object({
   MONGODB_TRANSACTIONS: bool(true),
 
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: optional,
+  NEXT_PUBLIC_CLERK_ENABLED: bool(true),
   CLERK_SECRET_KEY: optional,
   CLERK_WEBHOOK_SIGNING_SECRET: optional,
   CLERK_AUTHORIZED_PARTIES: csv,
@@ -35,6 +39,8 @@ const schema = z.object({
   TEST_AUTH_ENABLED: bool(false),
   NEXT_PUBLIC_TEST_AUTH_ENABLED: bool(false),
   TEST_AUTH_PASSWORD: optional,
+  /** Compatibility only. Public account registration never needs a shared password. */
+  LEGACY_TEST_AUTH_ENABLED: bool(false),
   TEST_MEDIA_ENABLED: bool(false),
 
   ABLY_API_KEY: optional,
@@ -81,7 +87,13 @@ let cached: Env | null = null;
 /** Explicit committed private-test defaults; isolated tests never inherit the real database or keys. */
 export function environmentInput(raw: Record<string, string | undefined> = process.env) {
   const configured = Object.fromEntries(Object.entries(raw).filter(([, value]) => value !== undefined && value !== ''));
-  return raw.NODE_ENV === 'test' ? configured : { ...PRIVATE_TEST_DEFAULTS, ...configured };
+  if (raw.NODE_ENV === 'test') return configured;
+  const appUrl = raw.NEXT_PUBLIC_APP_URL || (raw.VERCEL_URL ? `https://${raw.VERCEL_URL}` : raw.NODE_ENV === 'production' ? PUBLIC_DEFAULTS.appUrl : 'http://localhost:3000');
+  return {
+    ...PRIVATE_TEST_DEFAULTS, ...VEGVESEN_DEFAULTS,
+    ...(raw.NEXT_PUBLIC_CLERK_ENABLED === 'false' ? {} : CLERK_DEFAULTS),
+    ...configured, NEXT_PUBLIC_APP_URL: appUrl,
+  };
 }
 
 export function getEnv(): Env {
@@ -143,6 +155,10 @@ export function missingVars(integration: Integration, env: Env = getEnv()): stri
 
 export function isConfigured(integration: Integration, env: Env = getEnv()): boolean {
   return missingVars(integration, env).length === 0;
+}
+
+export function clerkAuthConfigured(env: Env = getEnv()): boolean {
+  return env.NEXT_PUBLIC_CLERK_ENABLED && Boolean(env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && env.CLERK_SECRET_KEY);
 }
 
 export const REQUIRED_INTEGRATIONS: Integration[] = ['database', 'auth', 'encryption', 'signing'];

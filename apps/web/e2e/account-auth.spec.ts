@@ -1,0 +1,38 @@
+import { expect, test } from '@playwright/test';
+
+test('personal registration, password errors, logout and returning to the same account', async ({ browser }) => {
+  const context = await browser.newContext({ locale: 'en-US', baseURL: 'http://localhost:3100' });
+  const page = await context.newPage();
+  await page.goto('/sign-up');
+  await expect(page.getByRole('heading', { name: 'Join VOGN' })).toBeVisible();
+  await page.getByLabel('Login name', { exact: true }).fill('new_rider');
+  await page.getByLabel('Password', { exact: true }).fill('my-personal-password-12345');
+  await page.getByLabel('Confirm password', { exact: true }).fill('a-different-password-12345');
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.locator('form').getByRole('alert')).toHaveText('The passwords do not match.');
+  await page.getByLabel('Confirm password', { exact: true }).fill('my-personal-password-12345');
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await page.waitForURL('**/onboarding');
+  await expect(page.locator('input[name="username"]')).toHaveValue('new_rider');
+  await page.locator('input[name="displayName"]').fill('New Rider');
+  await page.getByRole('checkbox').check();
+  await page.locator('button[type="submit"]').click();
+  await page.waitForURL('**/home');
+  const me = (await (await context.request.get('/api/v1/me')).json()).data;
+  expect(me.username).toBe('new_rider');
+  expect(me.platformRole).toBe('user');
+  const logout = await context.request.delete('/api/auth/session', { headers: { Origin: 'http://localhost:3100' } });
+  expect(logout.status()).toBe(200);
+  await page.goto('/home');
+  await page.waitForURL('**/sign-in?**');
+  await page.getByLabel('Login name', { exact: true }).fill('NEW_RIDER');
+  await page.getByLabel('Password', { exact: true }).fill('e2e-private-only-password-12345');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page.locator('form').getByRole('alert')).toHaveText('Incorrect username or password.');
+  await page.getByLabel('Password', { exact: true }).fill('my-personal-password-12345');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await page.waitForURL('**/home');
+  await page.reload();
+  expect((await (await context.request.get('/api/v1/me')).json()).data.id).toBe(me.id);
+  await context.close();
+});

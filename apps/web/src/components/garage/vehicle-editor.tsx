@@ -22,6 +22,7 @@ import { api, queryKeys } from '@/lib/api';
 import { useMyCrews } from '@/lib/hooks';
 import { ASPIRATION_LABELS, DRIVETRAIN_LABELS, FUEL_LABELS, TRANSMISSION_LABELS } from '@/lib/labels';
 import { mediaUrl } from '@/lib/media';
+import { vehicleAutofill } from '@/lib/vehicle-autofill';
 import { MediaUploader } from '../app/media-uploader';
 
 type FormIn = z.input<typeof vehicleCreateSchema>;
@@ -49,6 +50,7 @@ export function VehicleEditor({ vehicle }: { vehicle?: VehicleDetail }) {
   const errorMessage = useErrorMessage();
   const { data: crews } = useMyCrews();
   const [cover, setCover] = useState(vehicle?.coverImage ?? null);
+  const [plate, setPlate] = useState('');
   const [identifierMode, setIdentifierMode] = useState<'keep' | 'set' | 'remove'>(vehicle?.viewer.hasPrivateIdentifiers ? 'keep' : 'set');
 
   const form = useForm<FormIn>({
@@ -82,6 +84,29 @@ export function VehicleEditor({ vehicle }: { vehicle?: VehicleDetail }) {
   });
   const errors = form.formState.errors;
 
+  const lookup = useMutation({
+    mutationFn: () => api.vehicles.lookup({ countryCode: 'NO', registrationNumber: plate }),
+    onSuccess: (data) => {
+      const patch = vehicleAutofill(data);
+      const options = { shouldDirty: true, shouldValidate: true };
+      if (patch.make) form.setValue('make', patch.make, options);
+      if (patch.model) form.setValue('model', patch.model, options);
+      if (patch.year) form.setValue('year', patch.year, options);
+      if (patch.color) form.setValue('color', patch.color, options);
+      if (patch.drivetrain) form.setValue('drivetrain', patch.drivetrain, options);
+      if (patch.transmission) form.setValue('transmission', patch.transmission, options);
+      if (patch.specs?.engine) form.setValue('specs.engine', patch.specs.engine, options);
+      if (patch.specs?.displacementCc) form.setValue('specs.displacementCc', patch.specs.displacementCc, options);
+      if (patch.specs?.fuel) form.setValue('specs.fuel', patch.specs.fuel, options);
+      if (patch.specs?.originalHp) form.setValue('specs.originalHp', patch.specs.originalHp, options);
+      if (patch.specs?.weightKg) form.setValue('specs.weightKg', patch.specs.weightKg, options);
+      if (identifierMode === 'set') {
+        form.setValue('identifiers.countryCode', 'NO');
+        form.setValue('identifiers.registrationNumber', plate.replace(/[\s-]/g, '').toUpperCase(), options);
+      }
+    },
+  });
+
   const save = useMutation({
     mutationFn: async (values: FormIn) => {
       const payload = { ...values, coverMediaId: cover?.id ?? null };
@@ -110,6 +135,17 @@ export function VehicleEditor({ vehicle }: { vehicle?: VehicleDetail }) {
 
   return (
     <form onSubmit={form.handleSubmit((v) => save.mutate(v))} className="grid gap-5" noValidate>
+      <Section title="Find your car" description="Enter a Norwegian registration number to fill in the vehicle details. You can edit everything afterwards.">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <Field label="Norwegian registration number">
+            {(p) => <Input {...p} value={plate} onChange={(event) => { setPlate(event.target.value.toUpperCase()); lookup.reset(); }} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); if (plate.trim() && !lookup.isPending) lookup.mutate(); } }} autoComplete="off" autoCapitalize="characters" maxLength={12} placeholder="AB 12345" disabled={lookup.isPending} />}
+          </Field>
+          <Button type="button" variant="secondary" loading={lookup.isPending} disabled={!plate.trim() || save.isPending} onClick={() => lookup.mutate()}>Find vehicle</Button>
+        </div>
+        {lookup.error && <p role="alert" className="text-sm text-danger">{isApiError(lookup.error) && lookup.error.code === 'NOT_FOUND' ? 'No vehicle found. Check the registration number or enter the details manually below.' : errorMessage(lookup.error)}</p>}
+        {lookup.isSuccess && <p role="status" className="text-sm text-success">Details filled in from Statens vegvesen. Review or edit the fields below before saving.</p>}
+        <p className="text-xs text-muted">Source: Statens vegvesen. If the model year is unavailable, the year is filled from first registration. You can also enter the car manually.</p>
+      </Section>
       <Section title="Basics" description="What is it? Make and model are required.">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t('make')} error={errors.make?.message}>
@@ -322,7 +358,7 @@ export function VehicleEditor({ vehicle }: { vehicle?: VehicleDetail }) {
         <Button type="button" variant="ghost" onClick={() => router.back()}>
           Cancel
         </Button>
-        <Button type="submit" loading={save.isPending}>
+        <Button type="submit" loading={save.isPending} disabled={lookup.isPending}>
           {vehicle ? 'Save changes' : t('addVehicle')}
         </Button>
       </div>

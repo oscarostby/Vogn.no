@@ -1,8 +1,9 @@
 import 'server-only';
+import './clerk-defaults';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { getEnv, isConfigured } from './env';
+import { clerkAuthConfigured, getEnv, isConfigured } from './env';
 import { getDatabase } from './db';
 import { privateTestIdentityFromToken } from './private-test-auth';
 import { TEST_SESSION_COOKIE } from './test-session';
@@ -12,7 +13,9 @@ export async function currentClerkUserId(): Promise<string | null> {
   if (!isConfigured('auth')) return null;
   if (getEnv().TEST_AUTH_ENABLED) {
     const token = (await cookies()).get(TEST_SESSION_COOKIE)?.value;
-    return privateTestIdentityFromToken(token, await getDatabase());
+    const identity = await privateTestIdentityFromToken(token, await getDatabase());
+    if (identity) return identity;
+    if (!clerkAuthConfigured()) return null;
   }
   const { userId } = await auth();
   return userId ?? null;

@@ -12,7 +12,7 @@ function usePrivateSignedIn() {
   const [signedIn, setSignedIn] = useState(false);
   useEffect(() => {
     let active = true;
-    void fetch('/api/test-auth/session').then((response) => response.ok ? response.json() : null).then((payload: { data?: { signedIn: boolean } } | null) => {
+    void fetch('/api/auth/session').then((response) => response.ok ? response.json() : null).then((payload: { data?: { signedIn: boolean } } | null) => {
       if (active) setSignedIn(payload?.data?.signedIn ?? false);
     }).catch(() => undefined);
     return () => { active = false; };

@@ -124,3 +124,47 @@ The no-environment production verification builds without `.env.local`, checks A
 redirects and real test login, then scans browser JavaScript bundles for all server credential values. A
 future public launch must replace the test credentials and remove the committed defaults. External provider
 keys that were not supplied remain unconfigured; source defaults cannot provision those provider accounts.
+
+## ADR-016 — Personal password accounts (2026-10-26)
+
+The owner requested registration and login for everyone without needing the shared test password. The
+existing built-in auth backend now exposes separate registration and login endpoints. Registration stores
+an individual salted scrypt hash; login never creates identities. Existing private identities remain
+accessible with their previous credentials, and personal-password identities reject both the shared
+password endpoint and legacy signed cookies.
+
+Personal logins issue random opaque cookies backed by hashed, expiring MongoDB sessions. These do not use
+the committed test signing key. Logout revokes the current session; account deletion removes all sessions.
+The proxy performs a coarse token-format check, while page guards and APIs validate the session and stored
+identity. Onboarding, authorization and the explicit admin identity allowlist remain authoritative.
+The test-auth environment flags continue to select the built-in backend; disabling them selects Clerk.
+
+## ADR-017 — Plate autofill and social login alongside local accounts (2026-10-26)
+
+The owner supplied a Statens vegvesen key and explicitly requested hardcoding it. A server default now
+provides that key. Authenticated, rate-limited POST lookups use the official technical single-vehicle API,
+with a strict response allowlist. The editor copies available technical data into editable owner fields;
+missing fields keep their current values. The first registration supplies the year if model year is
+unavailable. Lookup does not mark ownership or specifications as verified, and no raw VIN or plate is
+returned by the adapter. Existing encrypted identifier storage remains in use when the owner saves.
+
+The selected Clerk application supplies Google and Apple sessions alongside existing local accounts.
+Clerk middleware runs when keys exist; protected pages and APIs accept either an existing local session
+or a verified Clerk session. Choosing social sign-in first clears the local session, so that the explicit
+provider choice determines the next identity. Users are not automatically merged by email or username.
+The development key is kept in the ignored local environment file. Google and Apple are already enabled
+with Clerk's shared development credentials; production provider provisioning remains a separate task.
+
+## ADR-018 — Self-contained deployment defaults with production overrides (2026-10-26)
+
+The owner explicitly authorized committing all current credentials to the private repository and requested
+a deployment without dotenv files. Clerk defaults are server-only, initialize the SDK before its imports,
+and remain overridable through environment values. The public publishable key is provided separately to
+the browser build; no server credential is exposed through Next.js `env`. Tests explicitly disable the
+integration and never inherit real credentials. Vercel deployment URLs override the default hosted URL,
+and authentication accepts the current request origin alongside configured authorized parties.
+
+Shared-password login and legacy signed cookies are disabled by default behind a separate compatibility
+flag. Personal-password registrations and opaque sessions continue to work. Existing Clerk development
+credentials remain development credentials; production OAuth/domain provisioning cannot be manufactured
+from source defaults and must be completed in Clerk before claiming production social sign-in.

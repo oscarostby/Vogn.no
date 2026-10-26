@@ -4,10 +4,13 @@ import sharp from 'sharp';
 async function login(browser: Browser, name: string) {
   const context = await browser.newContext({ locale: 'en-US', baseURL: 'http://localhost:3100' });
   const page = await context.newPage();
-  await page.goto('/sign-in');
-  await page.getByLabel('Test login name').fill(name);
-  await page.getByLabel('Private test password').fill('e2e-private-only-password-12345');
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  const owner = name === 'owner_ui';
+  const password = owner ? 'e2e-private-only-password-12345' : 'e2e-member-personal-password-12345';
+  await page.goto(owner ? '/sign-in' : '/sign-up');
+  await page.getByLabel('Login name', { exact: true }).fill(name);
+  await page.getByLabel('Password', { exact: true }).fill(password);
+  if (!owner) await page.getByLabel('Confirm password', { exact: true }).fill(password);
+  await page.getByRole('button', { name: owner ? 'Sign in' : 'Create account', exact: true }).click();
   await page.waitForURL('**/onboarding');
   await page.locator('input[name="username"]').fill(name);
   await page.locator('input[name="displayName"]').fill(name === 'owner_ui' ? 'Test Owner' : 'Test Member');

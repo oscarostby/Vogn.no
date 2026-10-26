@@ -20,7 +20,7 @@ beforeAll(async () => {
   previous = { ...getEnv() };
   h = await startHarness();
   setTestAuthResolver(null);
-  overrideEnvForTests({ TEST_AUTH_ENABLED: true, NEXT_PUBLIC_TEST_AUTH_ENABLED: true, TEST_AUTH_PASSWORD: password, APP_SIGNING_SECRET: secret });
+  overrideEnvForTests({ TEST_AUTH_ENABLED: true, NEXT_PUBLIC_TEST_AUTH_ENABLED: true, LEGACY_TEST_AUTH_ENABLED: true, TEST_AUTH_PASSWORD: password, APP_SIGNING_SECRET: secret });
 });
 
 afterAll(async () => {

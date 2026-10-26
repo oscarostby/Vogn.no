@@ -1,10 +1,13 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import { PUBLIC_DEFAULTS } from './src/config/public-defaults';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const isDev = process.env.NODE_ENV !== 'production';
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : isDev ? 'http://localhost:3000' : PUBLIC_DEFAULTS.appUrl);
+const clerkEnabled = process.env.NEXT_PUBLIC_CLERK_ENABLED !== 'false';
+const clerkPublishableKey = clerkEnabled ? process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || PUBLIC_DEFAULTS.clerkPublishableKey : '';
 // This flag is public. Database credentials and signing/encryption keys stay in server-only modules.
 const privateTestFlag = process.env.NEXT_PUBLIC_TEST_AUTH_ENABLED || process.env.TEST_AUTH_ENABLED || 'true';
 
@@ -46,7 +49,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  env: { NEXT_PUBLIC_APP_URL: appUrl, NEXT_PUBLIC_TEST_AUTH_ENABLED: privateTestFlag },
+  env: { NEXT_PUBLIC_APP_URL: appUrl, NEXT_PUBLIC_TEST_AUTH_ENABLED: privateTestFlag, NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: clerkPublishableKey, NEXT_PUBLIC_CLERK_ENABLED: String(clerkEnabled) },
   transpilePackages: [
     '@vogn/api-client',
     '@vogn/database',

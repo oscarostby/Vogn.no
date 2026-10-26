@@ -35,7 +35,12 @@ export async function getDatabase(): Promise<Database> {
   if (indexedClient !== client || indexedDbName !== db.databaseName) {
     indexedClient = client;
     indexedDbName = db.databaseName;
-    indexesReady = Promise.all([ensureIndexes(db), db.collection('privateTestIdentities').createIndex({ identityId: 1 }, { unique: true })]).catch((error: unknown) => {
+    indexesReady = Promise.all([
+      ensureIndexes(db),
+      db.collection('privateTestIdentities').createIndex({ identityId: 1 }, { unique: true }),
+      db.collection('accountSessions').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+      db.collection('accountSessions').createIndex({ identityId: 1 }),
+    ]).catch((error: unknown) => {
       indexedClient = null;
       indexedDbName = null;
       indexesReady = null;

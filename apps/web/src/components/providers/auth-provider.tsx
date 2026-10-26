@@ -1,3 +1,4 @@
+import '@/server/clerk-defaults';
 import { ClerkProvider } from '@clerk/nextjs';
 import type { ReactNode } from 'react';
 import { publicConfig } from '@/lib/config';
@@ -29,9 +30,10 @@ const appearance = {
  * and shows a configuration screen unless explicit password-gated private testing mode is enabled.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  if (publicConfig.privateTestAuth || !publicConfig.clerkConfigured) return <>{children}</>;
+  if (!publicConfig.clerkConfigured) return <>{children}</>;
   return (
     <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
       appearance={appearance}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"

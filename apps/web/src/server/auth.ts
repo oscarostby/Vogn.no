@@ -1,7 +1,8 @@
 import 'server-only';
+import './clerk-defaults';
 import { auth } from '@clerk/nextjs/server';
 import type { Database } from './db';
-import { getEnv, isConfigured, missingVars } from './env';
+import { clerkAuthConfigured, getEnv, isConfigured, missingVars } from './env';
 import { configMissing } from './errors';
 import { type Actor, actorFromUser } from './context';
 import { getDatabase } from './db';
@@ -27,7 +28,11 @@ export function setTestAuthResolver(resolver: ((req: Request) => string | null) 
 export async function getClerkUserId(req: Request): Promise<string | null> {
   if (testAuth && getEnv().NODE_ENV === 'test') return testAuth(req);
   if (!isConfigured('auth')) throw configMissing('Authentication', missingVars('auth'));
-  if (getEnv().TEST_AUTH_ENABLED) return privateTestIdentityFromRequest(req, await getDatabase());
+  if (getEnv().TEST_AUTH_ENABLED) {
+    const identity = await privateTestIdentityFromRequest(req, await getDatabase());
+    if (identity) return identity;
+    if (!clerkAuthConfigured()) return null;
+  }
   const { userId } = await auth();
   return userId ?? null;
 }

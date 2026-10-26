@@ -18,19 +18,30 @@ export function setThemePreference(theme: 'dark' | 'light' | 'system') {
 }
 
 export function UserMenu({ side = 'right' }: { side?: 'right' | 'top' | 'bottom' }) {
-  return publicConfig.privateTestAuth ? <PrivateTestUserMenu side={side} /> : <ClerkUserMenu side={side} />;
+  return publicConfig.clerkConfigured ? <ClerkUserMenu side={side} /> : <PrivateTestUserMenu side={side} />;
 }
 
 function ClerkUserMenu({ side }: { side: 'right' | 'top' | 'bottom' }) {
   const clerk = useClerk();
-  return <UserMenuContent side={side} onSignOut={() => clerk.signOut({ redirectUrl: '/' })} />;
+  return <UserMenuContent side={side} onSignOut={async () => {
+    try {
+      if (publicConfig.privateTestAuth) {
+        const result = await fetch('/api/auth/session', { method: 'DELETE' });
+        if (!result.ok) throw new Error('Could not sign out. Please try again.');
+      }
+      if (clerk.session) await clerk.signOut({ redirectUrl: '/' });
+      else window.location.replace('/');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not sign out.');
+    }
+  }} />;
 }
 
 function PrivateTestUserMenu({ side }: { side: 'right' | 'top' | 'bottom' }) {
   const router = useRouter();
   return <UserMenuContent side={side} onSignOut={async () => {
     try {
-      const result = await fetch('/api/test-auth/session', { method: 'DELETE' });
+      const result = await fetch('/api/auth/session', { method: 'DELETE' });
       if (!result.ok) throw new Error('Could not sign out. Please try again.');
       router.replace('/');
       router.refresh();

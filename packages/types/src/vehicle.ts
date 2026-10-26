@@ -76,6 +76,7 @@ export interface OfficialVehicleData {
   modelYear: number | null;
   seats: number | null;
   weightKg: number | null;
+  engine?: string | null;
 }
 
 export interface VehicleVerificationSummary {
