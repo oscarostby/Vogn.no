@@ -168,3 +168,15 @@ Shared-password login and legacy signed cookies are disabled by default behind a
 flag. Personal-password registrations and opaque sessions continue to work. Existing Clerk development
 credentials remain development credentials; production OAuth/domain provisioning cannot be manufactured
 from source defaults and must be completed in Clerk before claiming production social sign-in.
+
+## ADR-019 — Discreet gateway and member-only content (2026-10-27)
+
+The owner approved the minimal black VOGN gateway concept: brand, short welcome, sign-in, registration
+and legal links, with no public community teasers or automotive marketing. Registration remains open
+to everyone. Shared UI tokens, auth screens and the default Minimal preset use graphite and off-white
+instead of lime. Existing custom crew themes and user-selected colors remain personal choices.
+
+The app layout and proxy require a session for all community pages. Previously optional content API
+routes now explicitly require authentication and a completed profile even when private-test mode is
+disabled. Resource-level privacy checks still apply after login. Authentication, legal pages and the
+operational health endpoint remain accessible; Studio's sample preview also requires login.

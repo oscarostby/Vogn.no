@@ -1,6 +1,13 @@
 # VOGN
 
-Car communities, garages, crew themes, chat and events. Next.js web app in a pnpm/Turborepo workspace.
+Communities, crew themes, chat, garages and events. Next.js web app in a pnpm/Turborepo workspace.
+
+The public front page is a discreet black-and-graphite account gateway: VOGN, a short greeting, sign-in
+and registration. It contains no community previews or marketing sections. Community pages and content
+APIs require a signed-in account with a completed profile, independently of the private-test flags.
+Legal pages and authentication remain accessible before signing in. The neutral palette is shared by
+the gateway, auth screens, app controls and the default VOGN Minimal crew preset; custom crew colors
+and existing user preferences are retained.
 
 ## Run locally
 

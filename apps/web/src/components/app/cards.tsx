@@ -70,7 +70,7 @@ export function CrewCard({ crew, badge }: { crew: CrewSummary; badge?: string })
     <Link href={`/c/${crew.slug}`} className="group grid overflow-hidden rounded-xl border border-line bg-surface transition hover:border-line-strong">
       <div
         className="relative h-24 overflow-hidden"
-        style={{ background: crew.banner ? undefined : `linear-gradient(120deg, color-mix(in srgb, ${crew.accentColor ?? '#C8FF5F'} 45%, transparent), var(--vogn-surface))` }}
+        style={{ background: crew.banner ? undefined : `linear-gradient(120deg, color-mix(in srgb, ${crew.accentColor ?? '#A5A9B2'} 45%, transparent), var(--vogn-surface))` }}
       >
         {crew.banner && (
           // eslint-disable-next-line @next/next/no-img-element

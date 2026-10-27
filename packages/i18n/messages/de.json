@@ -62,5 +62,12 @@
     "FORBIDDEN": "Dazu hast du keine Berechtigung.",
     "NOT_FOUND": "Das konnten wir nicht finden.",
     "INTERNAL": "Bei uns ist etwas schiefgelaufen."
+  },
+  "gateway": {
+    "tagline": "Dein Ort. Deine Leute.",
+    "welcomeBack": "Schon Teil von VOGN? Willkommen zurück.",
+    "privacy": "Datenschutz",
+    "terms": "Nutzungsbedingungen",
+    "agreement": "Indem du fortfährst, akzeptierst du unsere"
   }
 }

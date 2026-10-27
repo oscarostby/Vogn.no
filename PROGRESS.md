@@ -1,6 +1,23 @@
 # VOGN — Progress (resumable checkpoint)
 
-Read `PLAN.md` (architecture) and `DECISIONS.md` (rationale) first. Last updated: 2026-10-26.
+Read `PLAN.md` (architecture) and `DECISIONS.md` (rationale) first. Last updated: 2026-10-27.
+
+## Minimal dark gateway (2026-10-27)
+
+Implemented the owner's approved final mockup: black/graphite, VOGN branding, a short localized welcome,
+sign-in and registration, plus a minimal legal/language footer. Removed public marketing sections and
+content previews. The auth pages use the same calm layout. Shared UI tokens, Clerk controls and the
+default VOGN Minimal preset use neutral accents instead of lime; existing custom themes are preserved.
+
+All community pages and previously optional content APIs now require login regardless of test mode.
+Resource privacy checks remain in place, and content APIs also require completed onboarding. Studio's
+sample playground requires login. Legal and authentication pages remain public. Desktop and mobile
+gateway screenshots have been inspected; the new browser test checks navigation, narrow layouts and
+signed-out page redirects. A separate integration test checks all 15 content endpoints outside test mode.
+Verified: all 100 web tests, 21 theme-engine tests and four i18n tests pass. All four browser flows pass
+(gateway/mobile/privacy, signup/relogin, two-user chat/media/Studio, vehicle autofill/edit/save). The normal
+production build and TypeScript pass; ESLint has zero errors and the same three existing warnings.
+The built app is served at `http://localhost:3000` and left running. These design changes are local.
 
 ## Personal accounts (2026-10-26)
 

@@ -20,10 +20,12 @@ function usePrivateSignedIn() {
   return signedIn;
 }
 
-function PrivateAuthButtons({ size }: { size: 'sm' | 'md' | 'lg' }) {
+type AuthButtonOptions = { size: 'sm' | 'md' | 'lg'; registrationVariant?: 'primary' | 'outline' };
+
+function PrivateAuthButtons({ size, registrationVariant = 'primary' }: AuthButtonOptions) {
   const signedIn = usePrivateSignedIn();
   const t = useTranslations('common');
-  return <div className="flex items-center gap-1.5">{signedIn ? <Button asChild size={size}><Link href="/home">{t('openApp')} <ArrowRight aria-hidden="true" /></Link></Button> : <><Button asChild variant="ghost" size={size}><Link href="/sign-in">{t('signIn')}</Link></Button><Button asChild size={size}><Link href="/sign-up">{t('signUp')}</Link></Button></>}</div>;
+  return <div className="flex items-center gap-1.5 sm:gap-3">{signedIn ? <Button asChild size={size}><Link href="/home">{t('openApp')} <ArrowRight aria-hidden="true" /></Link></Button> : <><Button asChild variant="ghost" size={size}><Link href="/sign-in">{t('signIn')}</Link></Button><Button asChild variant={registrationVariant} size={size}><Link href="/sign-up">{t('signUp')}</Link></Button></>}</div>;
 }
 
 function PrivatePrimaryCta({ label, size }: { label: string; size: 'md' | 'lg' }) {
@@ -32,15 +34,15 @@ function PrivatePrimaryCta({ label, size }: { label: string; size: 'md' | 'lg' }
   return <Button asChild size={size}><Link href={signedIn ? '/home' : '/sign-up'}>{signedIn ? t('openApp') : label} <ArrowRight aria-hidden="true" /></Link></Button>;
 }
 
-export function AuthButtons({ size = 'sm' }: { size?: 'sm' | 'md' | 'lg' }) {
+export function AuthButtons({ size = 'sm', registrationVariant = 'primary' }: Partial<AuthButtonOptions>) {
   const t = useTranslations('common');
-  if (publicConfig.privateTestAuth) return <PrivateAuthButtons size={size} />;
+  if (publicConfig.privateTestAuth) return <PrivateAuthButtons size={size} registrationVariant={registrationVariant} />;
   const signedOut = (
     <>
       <Button asChild variant="ghost" size={size}>
         <Link href="/sign-in">{t('signIn')}</Link>
       </Button>
-      <Button asChild size={size}>
+      <Button asChild variant={registrationVariant} size={size}>
         <Link href="/sign-up">{t('signUp')}</Link>
       </Button>
     </>

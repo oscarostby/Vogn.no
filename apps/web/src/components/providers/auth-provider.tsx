@@ -5,12 +5,12 @@ import { publicConfig } from '@/lib/config';
 
 const appearance = {
   variables: {
-    colorPrimary: '#C8FF5F',
-    colorPrimaryForeground: '#101114',
-    colorBackground: '#191B20',
+    colorPrimary: '#F2F3F5',
+    colorPrimaryForeground: '#090A0C',
+    colorBackground: '#121418',
     colorForeground: '#F5F5F6',
     colorMutedForeground: '#A4A8B2',
-    colorInput: '#101114',
+    colorInput: '#090A0C',
     colorInputForeground: '#F5F5F6',
     colorNeutral: '#F5F5F6',
     colorDanger: '#FF6B6B',

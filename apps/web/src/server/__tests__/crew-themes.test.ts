@@ -114,7 +114,7 @@ describe('crew theme draft and publish authorization', () => {
     const params = { crewId: target.id };
     expect((await call(publishedRoute.GET, { as: owner.clerkId, params })).status).toBe(200);
     expect((await call(publishedRoute.GET, { as: outsider.clerkId, params })).status).toBe(404);
-    expect((await call(publishedRoute.GET, { params })).status).toBe(404);
+    expect((await call(publishedRoute.GET, { params })).status).toBe(401);
     expect((await call(draftRoute.GET, { as: outsider.clerkId, params })).status).toBe(404);
   });
 

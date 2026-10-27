@@ -107,7 +107,7 @@ describe('crews', () => {
     const b = await createUser();
     const crew = await makeCrew(owner.clerkId, 'hidden');
     const invite = await call<CrewInvitation>(invitesRoute.POST, { as: owner.clerkId, params: { crewId: crew.id }, body: { maxUses: 1, expiresInHours: 24 } });
-    const preview = await call<{ valid: boolean; crew: { name: string } }>(invitePublicRoute.GET, { params: { code: invite.data.code } });
+    const preview = await call<{ valid: boolean; crew: { name: string } }>(invitePublicRoute.GET, { as: a.clerkId, params: { code: invite.data.code } });
     expect(preview.data.valid).toBe(true);
     const accepted = await call<CrewDetail>(invitePublicRoute.POST, { as: a.clerkId, params: { code: invite.data.code } });
     expect(accepted.data.viewer.status).toBe('member');

@@ -2,7 +2,7 @@ import { oid } from '@/server/http/params';
 import { route } from '@/server/http/route';
 import { eventIcs } from '@/server/services/events';
 
-export const GET = route<{ id: string }>({ auth: 'optional' }, async ({ ctx, params, requestId }) => {
+export const GET = route<{ id: string }>({ auth: 'required' }, async ({ ctx, params, requestId }) => {
   const ics = await eventIcs(ctx, oid(params.id, 'Event'));
   return new Response(ics, {
     headers: {

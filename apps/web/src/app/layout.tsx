@@ -11,16 +11,16 @@ import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicConfig.appUrl),
-  title: { default: 'VOGN — Your crew. Your space.', template: '%s · VOGN' },
+  title: { default: 'VOGN', template: '%s · VOGN' },
   description:
-    'VOGN is the global community platform for car enthusiasts: customizable crews, digital garages, realtime chat and events.',
+    'Your space. Your people.',
   applicationName: 'VOGN',
   ...(publicConfig.privateTestAuth ? { robots: { index: false, follow: false } } : {}),
   openGraph: {
     type: 'website',
     siteName: 'VOGN',
-    title: 'VOGN — Your crew. Your space.',
-    description: 'Customizable crews, digital garages, realtime chat and events for car people everywhere.',
+    title: 'VOGN',
+    description: 'Your space. Your people.',
     images: [{ url: '/brand/og.png', width: 1200, height: 630, alt: 'VOGN' }],
   },
   twitter: { card: 'summary_large_image' },
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#101114' },
+    { media: '(prefers-color-scheme: dark)', color: '#090a0c' },
     { media: '(prefers-color-scheme: light)', color: '#F7F7F5' },
   ],
   width: 'device-width',

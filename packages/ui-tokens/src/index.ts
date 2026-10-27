@@ -26,24 +26,24 @@ export interface ColorTokens {
 }
 
 export const darkColors: ColorTokens = {
-  background: '#101114',
-  surface: '#191B20',
-  surfaceElevated: '#22252B',
-  surfaceSunken: '#0C0D0F',
-  border: '#30333A',
-  borderStrong: '#454952',
-  text: '#F5F5F6',
-  textMuted: '#A4A8B2',
-  textSubtle: '#7A7F8A',
-  accent: '#C8FF5F',
-  accentContrast: '#101114',
-  accentMuted: '#2B3420',
+  background: '#090A0C',
+  surface: '#121418',
+  surfaceElevated: '#1C1F25',
+  surfaceSunken: '#07080A',
+  border: '#282C33',
+  borderStrong: '#424750',
+  text: '#F2F3F5',
+  textMuted: '#A5A9B2',
+  textSubtle: '#8A909C',
+  accent: '#F2F3F5',
+  accentContrast: '#090A0C',
+  accentMuted: '#24272E',
   info: '#6CB6FF',
   success: '#5FD38D',
   warning: '#F2C14E',
   danger: '#FF6B6B',
-  dangerContrast: '#101114',
-  focus: '#C8FF5F',
+  dangerContrast: '#090A0C',
+  focus: '#F2F3F5',
   overlay: 'rgba(5, 6, 8, 0.72)',
 };
 
@@ -57,17 +57,15 @@ export const lightColors: ColorTokens = {
   text: '#121316',
   textMuted: '#5B5F68',
   textSubtle: '#80848C',
-  // The lime accent fails contrast on white as text, so light mode uses a deep olive for text/accents
-  // and keeps lime for filled surfaces only (see accentFill usage in components).
-  accent: '#3F6212',
+  accent: '#22252B',
   accentContrast: '#FFFFFF',
-  accentMuted: '#ECF7D4',
+  accentMuted: '#E7E9ED',
   info: '#1F6FEB',
   success: '#1A7F4B',
   warning: '#9A6700',
   danger: '#C62828',
   dangerContrast: '#FFFFFF',
-  focus: '#3F6212',
+  focus: '#22252B',
   overlay: 'rgba(18, 19, 22, 0.45)',
 };
 
@@ -75,8 +73,8 @@ export const lightColors: ColorTokens = {
 export const brand = {
   name: 'VOGN',
   tagline: 'Your crew. Your space.',
-  lime: '#C8FF5F',
-  ink: '#101114',
+  accent: '#F2F3F5',
+  ink: '#090A0C',
   domain: 'vogn.no',
 } as const;
 

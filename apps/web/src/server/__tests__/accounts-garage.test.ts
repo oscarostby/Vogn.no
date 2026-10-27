@@ -109,7 +109,7 @@ describe('profiles & privacy', () => {
     const old = a.username;
     const renamed = await call<{ username: string }>(meRoute.PATCH, { method: 'PATCH', as: a.clerkId, body: { username: `${old}_x` } });
     expect(renamed.status).toBe(200);
-    const viaOld = await call<{ username: string }>(profileRoute.GET, { params: { username: old } });
+    const viaOld = await call<{ username: string }>(profileRoute.GET, { as: b.clerkId, params: { username: old } });
     expect(viaOld.data.username).toBe(`${old}_x`);
     const steal = await call(meRoute.PATCH, { method: 'PATCH', as: b.clerkId, body: { username: old } });
     expect(steal.status).toBe(422);
@@ -148,13 +148,14 @@ describe('garage', () => {
     });
     const id = v.data.id;
     expect((await call(vehicleRoute.GET, { as: stranger.clerkId, params: { id } })).status).toBe(404);
-    expect((await call(vehicleRoute.GET, { params: { id } })).status).toBe(404);
+    expect((await call(vehicleRoute.GET, { params: { id } })).status).toBe(401);
     expect((await call(vehicleRoute.GET, { as: owner.clerkId, params: { id } })).status).toBe(200);
     const garage = await call<unknown[]>(garageRoute.GET, { as: stranger.clerkId, params: { username: owner.username } });
     expect(garage.data).toHaveLength(0);
 
     await call(vehicleRoute.PATCH, { method: 'PATCH', as: owner.clerkId, params: { id }, body: { visibility: 'public' } });
-    expect((await call(vehicleRoute.GET, { params: { id } })).status).toBe(200);
+    expect((await call(vehicleRoute.GET, { as: stranger.clerkId, params: { id } })).status).toBe(200);
+    expect((await call(vehicleRoute.GET, { params: { id } })).status).toBe(401);
     const hijack = await call(vehicleRoute.PATCH, { method: 'PATCH', as: stranger.clerkId, params: { id }, body: { nickname: 'mine now' } });
     expect(hijack.status).toBe(403);
     const del = await call(vehicleRoute.DELETE, { method: 'DELETE', as: stranger.clerkId, params: { id } });
@@ -202,6 +203,7 @@ describe('garage', () => {
 describe('account lifecycle', () => {
   it('exports personal data and deletes the account', async () => {
     const a = await createUser();
+    const viewer = await createUser();
     const v = await call<{ id: string }>(vehiclesRoute.POST, { as: a.clerkId, body: { make: 'BMW', model: 'M3', visibility: 'public' } });
     const exported = await exportRoute.GET(
       new Request('http://localhost:3000/api/v1/me/export', { headers: { 'x-test-clerk-user': a.clerkId } }),
@@ -215,8 +217,8 @@ describe('account lifecycle', () => {
     expect(wrong.status).toBe(422);
     const ok = await call(deleteRoute.POST, { as: a.clerkId, body: { confirmUsername: a.username } });
     expect(ok.status).toBe(200);
-    expect((await call(vehicleRoute.GET, { params: { id: v.data.id } })).status).toBe(404);
-    expect((await call(profileRoute.GET, { params: { username: a.username } })).status).toBe(404);
+    expect((await call(vehicleRoute.GET, { as: viewer.clerkId, params: { id: v.data.id } })).status).toBe(404);
+    expect((await call(profileRoute.GET, { as: viewer.clerkId, params: { username: a.username } })).status).toBe(404);
     const me = await call<{ needsOnboarding?: boolean }>(meRoute.GET, { as: a.clerkId });
     expect(me.data.needsOnboarding).toBe(true);
   });

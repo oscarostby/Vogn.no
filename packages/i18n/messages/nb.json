@@ -151,5 +151,18 @@
     "RATE_LIMITED": "Du gjør dette for ofte. Vent litt.",
     "INTERNAL": "Noe gikk galt hos oss.",
     "NETWORK": "Nettverksfeil — sjekk tilkoblingen."
+  },
+  "gateway": {
+    "tagline": "Ditt sted. Dine folk.",
+    "welcomeBack": "Allerede en del av VOGN? Velkommen tilbake.",
+    "privacy": "Personvern",
+    "terms": "Vilkår",
+    "agreement": "Ved å fortsette godtar du våre",
+    "signInTitle": "Velkommen tilbake",
+    "signInSubtitle": "Logg inn med innloggingsnavn og passord.",
+    "signUpTitle": "Opprett konto",
+    "signUpSubtitle": "Lag din egen konto med et personlig passord.",
+    "socialSignInSubtitle": "Logg inn med Apple, Google eller e-post.",
+    "socialSignUpSubtitle": "Opprett konto med Apple, Google eller e-post."
   }
 }

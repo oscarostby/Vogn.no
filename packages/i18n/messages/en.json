@@ -515,5 +515,18 @@
     "terms": "Terms of Service",
     "guidelines": "Community Guidelines",
     "updated": "Last updated {date}"
+  },
+  "gateway": {
+    "tagline": "Your space. Your people.",
+    "welcomeBack": "Already part of VOGN? Welcome back.",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "agreement": "By continuing, you accept our",
+    "signInTitle": "Welcome back",
+    "signInSubtitle": "Sign in with your login name and password.",
+    "signUpTitle": "Join VOGN",
+    "signUpSubtitle": "Create your own account with a personal password.",
+    "socialSignInSubtitle": "Sign in with Apple, Google or email.",
+    "socialSignUpSubtitle": "Create your account with Apple, Google or email."
   }
 }

@@ -62,5 +62,12 @@
     "FORBIDDEN": "Du har ikke tilladelse til det.",
     "NOT_FOUND": "Vi kunne ikke finde det.",
     "INTERNAL": "Noget gik galt hos os."
+  },
+  "gateway": {
+    "tagline": "Dit sted. Dine mennesker.",
+    "welcomeBack": "Allerede en del af VOGN? Velkommen tilbage.",
+    "privacy": "Privatliv",
+    "terms": "Vilkår",
+    "agreement": "Ved at fortsætte accepterer du vores"
   }
 }

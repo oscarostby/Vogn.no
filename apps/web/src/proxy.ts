@@ -17,8 +17,14 @@ const PROTECTED_PREFIXES = [
   '/onboarding',
   '/admin',
   '/verification',
+  '/discover',
+  '/events',
+  '/u',
+  '/v',
+  '/c',
+  '/invite',
+  '/studio',
 ];
-const PROTECTED_CREW_SECTIONS = new Set(['settings', 'studio', 'ch']);
 
 /**
  * Coarse redirect-to-sign-in for app pages. This is a UX convenience only: every page/layout and API
@@ -26,10 +32,7 @@ const PROTECTED_CREW_SECTIONS = new Set(['settings', 'studio', 'ch']);
  */
 function isProtectedPage(req: NextRequest): boolean {
   const path = req.nextUrl.pathname;
-  if (getEnv().TEST_AUTH_ENABLED && ['/discover', '/events', '/u', '/v', '/c', '/invite'].some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) return true;
-  if (PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) return true;
-  const parts = path.split('/');
-  return parts[1] === 'c' && PROTECTED_CREW_SECTIONS.has(parts[3] ?? '');
+  return PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
 }
 
 const clerkConfigured = clerkAuthConfigured();

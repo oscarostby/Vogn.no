@@ -5,7 +5,7 @@ import { deleteEvent, getEvent, updateEvent } from '@/server/services/events';
 
 type P = { id: string };
 
-export const GET = route<P>({ auth: 'optional' }, async ({ ctx, params }) => getEvent(ctx, oid(params.id, 'Event')));
+export const GET = route<P>({ auth: 'required' }, async ({ ctx, params }) => getEvent(ctx, oid(params.id, 'Event')));
 
 export const PATCH = route({ auth: 'required', body: eventUpdateSchema }, async ({ ctx, params, body }) =>
   updateEvent(authed(ctx), oid((params as P).id, 'Event'), body),

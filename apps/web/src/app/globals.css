@@ -6,25 +6,25 @@
 :root,
 [data-theme='dark'] {
   color-scheme: dark;
-  --vogn-bg: #101114;
-  --vogn-surface: #191b20;
-  --vogn-elevated: #22252b;
-  --vogn-sunken: #0c0d0f;
-  --vogn-line: #30333a;
-  --vogn-line-strong: #454952;
-  --vogn-fg: #f5f5f6;
-  --vogn-muted: #a4a8b2;
-  --vogn-subtle: #7a7f8a;
-  --vogn-accent: #c8ff5f;
-  --vogn-accent-fg: #101114;
-  --vogn-accent-muted: #2b3420;
-  --vogn-accent-text: #c8ff5f;
+  --vogn-bg: #090a0c;
+  --vogn-surface: #121418;
+  --vogn-elevated: #1c1f25;
+  --vogn-sunken: #07080a;
+  --vogn-line: #282c33;
+  --vogn-line-strong: #424750;
+  --vogn-fg: #f2f3f5;
+  --vogn-muted: #a5a9b2;
+  --vogn-subtle: #8a909c;
+  --vogn-accent: #f2f3f5;
+  --vogn-accent-fg: #090a0c;
+  --vogn-accent-muted: #24272e;
+  --vogn-accent-text: #f2f3f5;
   --vogn-info: #6cb6ff;
   --vogn-success: #5fd38d;
   --vogn-warning: #f2c14e;
   --vogn-danger: #ff6b6b;
-  --vogn-danger-fg: #101114;
-  --vogn-ring: #c8ff5f;
+  --vogn-danger-fg: #090a0c;
+  --vogn-ring: #f2f3f5;
   --vogn-overlay: rgb(5 6 8 / 0.72);
   --vogn-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
 }
@@ -40,16 +40,16 @@
   --vogn-fg: #121316;
   --vogn-muted: #5b5f68;
   --vogn-subtle: #80848c;
-  --vogn-accent: #c8ff5f;
-  --vogn-accent-fg: #121316;
-  --vogn-accent-muted: #ecf7d4;
-  --vogn-accent-text: #3f6212;
+  --vogn-accent: #22252b;
+  --vogn-accent-fg: #ffffff;
+  --vogn-accent-muted: #e7e9ed;
+  --vogn-accent-text: #22252b;
   --vogn-info: #1f6feb;
   --vogn-success: #1a7f4b;
   --vogn-warning: #9a6700;
   --vogn-danger: #c62828;
   --vogn-danger-fg: #ffffff;
-  --vogn-ring: #3f6212;
+  --vogn-ring: #22252b;
   --vogn-overlay: rgb(18 19 22 / 0.45);
   --vogn-shadow: 0 1px 2px rgb(20 20 20 / 0.06), 0 8px 24px -12px rgb(20 20 20 / 0.18);
 }
@@ -66,16 +66,16 @@
     --vogn-fg: #121316;
     --vogn-muted: #5b5f68;
     --vogn-subtle: #80848c;
-    --vogn-accent: #c8ff5f;
-    --vogn-accent-fg: #121316;
-    --vogn-accent-muted: #ecf7d4;
-    --vogn-accent-text: #3f6212;
+    --vogn-accent: #22252b;
+    --vogn-accent-fg: #ffffff;
+    --vogn-accent-muted: #e7e9ed;
+    --vogn-accent-text: #22252b;
     --vogn-info: #1f6feb;
     --vogn-success: #1a7f4b;
     --vogn-warning: #9a6700;
     --vogn-danger: #c62828;
     --vogn-danger-fg: #ffffff;
-    --vogn-ring: #3f6212;
+    --vogn-ring: #22252b;
     --vogn-overlay: rgb(18 19 22 / 0.45);
     --vogn-shadow: 0 1px 2px rgb(20 20 20 / 0.06), 0 8px 24px -12px rgb(20 20 20 / 0.18);
   }

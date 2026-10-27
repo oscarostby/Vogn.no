@@ -3,7 +3,7 @@ import { authed } from '@/server/http/params';
 import { created, paginated, route } from '@/server/http/route';
 import { createEvent, listEvents } from '@/server/services/events';
 
-export const GET = route({ auth: 'optional', query: eventListQuery }, async ({ ctx, query }) => {
+export const GET = route({ auth: 'required', query: eventListQuery }, async ({ ctx, query }) => {
   const { items, nextCursor } = await listEvents(ctx, query);
   return paginated(items, nextCursor);
 });

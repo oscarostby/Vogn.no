@@ -62,5 +62,12 @@
     "FORBIDDEN": "Du har inte behörighet att göra det.",
     "NOT_FOUND": "Vi hittade det inte.",
     "INTERNAL": "Något gick fel hos oss."
+  },
+  "gateway": {
+    "tagline": "Din plats. Ditt folk.",
+    "welcomeBack": "Redan en del av VOGN? Välkommen tillbaka.",
+    "privacy": "Integritet",
+    "terms": "Villkor",
+    "agreement": "Genom att fortsätta godkänner du våra"
   }
 }
